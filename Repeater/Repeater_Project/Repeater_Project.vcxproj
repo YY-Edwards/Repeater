@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="class\AudioAlsa\AudioAlsa.cpp" />
+    <ClCompile Include="class\AudioAlsa\Speex\myspeex.cpp" />
+    <ClCompile Include="class\AudioQueue\AudioQueue.cpp" />
+    <ClCompile Include="class\GPIO_App\gpio.cpp" />
+    <ClCompile Include="class\GPIO_App\GPIO_App.cpp" />
+    <ClCompile Include="class\json-file\MFile.cpp" />
+    <ClCompile Include="class\main.cpp" />
+    <ClCompile Include="class\Monitor_Interface\Monitor_Interface.cpp" />
+    <ClCompile Include="class\MyRepeater.cpp" />
+    <ClCompile Include="class\Myrtp\Myrtp.cpp" />
+    <ClCompile Include="class\protocol\CMaster.cpp" />
+    <ClCompile Include="class\protocol\CSlave.cpp" />
+    <ClCompile Include="class\protocol\Protocol.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="class\AudioAlsa\AudioAlsa.h" />
+    <ClInclude Include="class\AudioAlsa\Speex\myspeex.h" />
+    <ClInclude Include="class\AudioQueue\AudioQueue.h" />
+    <ClInclude Include="class\GPIO_App\gpio.h" />
+    <ClInclude Include="class\GPIO_App\GPIO_App.h" />
+    <ClInclude Include="class\json-file\MFile.h" />
+    <ClInclude Include="class\Monitor_Interface\Monitor_Interface.h" />
+    <ClInclude Include="class\MyRepeater.h" />
+    <ClInclude Include="class\Myrtp\Myrtp.h" />
+    <ClInclude Include="class\protocol\CMaster.h" />
+    <ClInclude Include="class\protocol\Common.h" />
+    <ClInclude Include="class\protocol\CSlave.h" />
+    <ClInclude Include="class\protocol\Protocol.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{857F0505-97AD-4C05-8576-4B54988AA003}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Repeater_Project</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\AudioAlsa\Speex;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\protocol;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\Myrtp;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\Monitor_Interface;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\json-file;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\GPIO_App;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\AudioQueue;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\AudioAlsa;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

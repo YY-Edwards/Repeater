@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="源文件\AudioAlsa">
+      <UniqueIdentifier>{20e81f44-76c4-4c30-a1f4-17c6f8fa93dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\AudioQueue">
+      <UniqueIdentifier>{dfb367ea-590e-4908-928d-8bafaca5db2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\GPIO_App">
+      <UniqueIdentifier>{be6a9bf4-efe6-4b5f-ae6f-173d6474caa7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Monitor_Interface">
+      <UniqueIdentifier>{7e862577-e5ed-4278-a341-d803178f9d8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Myrtp">
+      <UniqueIdentifier>{c02702df-7434-40cb-b27d-f578696c04ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Protocol">
+      <UniqueIdentifier>{21565829-05a7-40ea-b637-91e8ef3642d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Protocol\master">
+      <UniqueIdentifier>{f3f43061-ed5b-4980-9e42-aa692b4385e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Protocol\slave">
+      <UniqueIdentifier>{0fa9ab5b-de6a-4c87-a736-ceafd65a6510}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Protocol\connect_prorocol">
+      <UniqueIdentifier>{59f5fe1e-50b2-403c-83f1-b00f68dfecba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\AudioAlsa\Speex">
+      <UniqueIdentifier>{e3da969f-eb24-4d38-b87c-0b8d485075ca}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="class\AudioAlsa\AudioAlsa.cpp">
+      <Filter>源文件\AudioAlsa</Filter>
+    </ClCompile>
+    <ClCompile Include="class\AudioQueue\AudioQueue.cpp">
+      <Filter>源文件\AudioQueue</Filter>
+    </ClCompile>
+    <ClCompile Include="class\GPIO_App\GPIO_App.cpp">
+      <Filter>源文件\GPIO_App</Filter>
+    </ClCompile>
+    <ClCompile Include="class\Myrtp\Myrtp.cpp">
+      <Filter>源文件\Myrtp</Filter>
+    </ClCompile>
+    <ClCompile Include="class\Monitor_Interface\Monitor_Interface.cpp">
+      <Filter>源文件\Monitor_Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="class\main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="class\GPIO_App\gpio.cpp">
+      <Filter>源文件\GPIO_App</Filter>
+    </ClCompile>
+    <ClCompile Include="class\protocol\CMaster.cpp">
+      <Filter>源文件\Protocol\master</Filter>
+    </ClCompile>
+    <ClCompile Include="class\protocol\Protocol.cpp">
+      <Filter>源文件\Protocol\connect_prorocol</Filter>
+    </ClCompile>
+    <ClCompile Include="class\protocol\CSlave.cpp">
+      <Filter>源文件\Protocol\slave</Filter>
+    </ClCompile>
+    <ClCompile Include="class\json-file\MFile.cpp">
+      <Filter>源文件\Monitor_Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="class\MyRepeater.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="class\AudioAlsa\Speex\myspeex.cpp">
+      <Filter>源文件\AudioAlsa\Speex</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="class\AudioAlsa\AudioAlsa.h">
+      <Filter>源文件\AudioAlsa</Filter>
+    </ClInclude>
+    <ClInclude Include="class\AudioQueue\AudioQueue.h">
+      <Filter>源文件\AudioQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="class\GPIO_App\GPIO_App.h">
+      <Filter>源文件\GPIO_App</Filter>
+    </ClInclude>
+    <ClInclude Include="class\Monitor_Interface\Monitor_Interface.h">
+      <Filter>源文件\Monitor_Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="class\Myrtp\Myrtp.h">
+      <Filter>源文件\Myrtp</Filter>
+    </ClInclude>
+    <ClInclude Include="class\GPIO_App\gpio.h">
+      <Filter>源文件\GPIO_App</Filter>
+    </ClInclude>
+    <ClInclude Include="class\protocol\CMaster.h">
+      <Filter>源文件\Protocol\master</Filter>
+    </ClInclude>
+    <ClInclude Include="class\protocol\Protocol.h">
+      <Filter>源文件\Protocol\connect_prorocol</Filter>
+    </ClInclude>
+    <ClInclude Include="class\protocol\CSlave.h">
+      <Filter>源文件\Protocol\slave</Filter>
+    </ClInclude>
+    <ClInclude Include="class\protocol\Common.h">
+      <Filter>源文件\Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="class\json-file\MFile.h">
+      <Filter>源文件\Monitor_Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="class\MyRepeater.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="class\AudioAlsa\Speex\myspeex.h">
+      <Filter>源文件\AudioAlsa\Speex</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
