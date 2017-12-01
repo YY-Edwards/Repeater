@@ -1,0 +1,2 @@
+LINE_IN£º10k
+LINE_OUT:2.7K

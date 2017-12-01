@@ -1,0 +1,6 @@
+Added Component: Designator=R28(0603)
+Added Pin To Net: NetName=VDD_3V3 Pin=R28-1
+Added Pin To Net: NetName=A_CD Pin=R28-2
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R28 DNP
+Added Room: Name=BTB CONNECTOR
+Added Room: Name=DRS_SCH-02-24

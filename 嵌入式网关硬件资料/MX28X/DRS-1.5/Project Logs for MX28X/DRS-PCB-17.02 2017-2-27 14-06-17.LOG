@@ -1,0 +1,8 @@
+Change Component Footprint: Designator=R22 Old Footprint=0603 New Footprint=C0402
+Change Component Footprint: Designator=R23 Old Footprint=0603 New Footprint=C0402
+Change Component Comment : Designator=U4 Old Comment=LT1084-5V New Comment=LT1084-5V TO220
+Change Net Name : Old Net Name=NetD2_1 New Net Name=NetD5_1
+Change Net Name : Old Net Name=NetD3_1 New Net Name=NetD6_1
+Change Class Name : Old Net Name=pcb-01-13 New Net Name=DRS_SCH-02-24
+Added Room: Name=BTB CONNECTOR
+Added Room: Name=DRS_SCH-02-24

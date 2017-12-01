@@ -1,0 +1,9 @@
+Removed Pin From Net: NetName=NetC15_2 Pin=R22-1
+Removed Pin From Net: NetName=VDD_5V Pin=R22-2
+Removed Member From Class: ClassName=DRS_SCH-02-24 Member=R22
+Change Component Comment : Designator=R22 Old Comment=820R New Comment=4.7K
+Added Component: Designator=R28(0603)
+Added Pin To Net: NetName=NetC15_2 Pin=R28-1
+Added Pin To Net: NetName=VDD_5V Pin=R28-2
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R28 820R
+Added Room: Name=DRS_SCH-02-24

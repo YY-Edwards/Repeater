@@ -1,0 +1,24 @@
+Change Component Comment : Designator=R21 Old Comment=820R New Comment=220R
+Change Component Comment : Designator=R28 Old Comment=820R New Comment=220R
+Change Component Designator: OldDesignator=D5 NewDesignator=D4
+Change Component Designator: OldDesignator=D6 NewDesignator=D5
+Change Component Designator: OldDesignator=D9 NewDesignator=D6
+Added Component: Designator=D2(LED_BLUE)
+Added Component: Designator=D3(LED_BLUE)
+Added Component: Designator=R29(0603)
+Added Component: Designator=R30(0603)
+Added Pin To Net: NetName=VDD_3V3 Pin=D2-2
+Added Pin To Net: NetName=VDD_3V3 Pin=D3-2
+Added Pin To Net: NetName=SSP0_DATA4 Pin=R29-1
+Added Pin To Net: NetName=SSP0_DATA5 Pin=R30-1
+Change Net Name : Old Net Name=NetD5_1 New Net Name=NetD4_1
+Change Net Name : Old Net Name=NetD6_1 New Net Name=NetD5_1
+Added Pin To Net: NetName=NetD2_1 Pin=D2-1
+Added Pin To Net: NetName=NetD2_1 Pin=R29-2
+Added Net: Name=NetD2_1
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component D2 LED_BLUE
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component D3 LED_BLUE
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R29 820R
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R30 820R
+Added Room: Name=BTB CONNECTOR
+Added Room: Name=DRS_SCH-02-24

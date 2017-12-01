@@ -1,0 +1,15 @@
+1.烧写linux内核。
+2.拷贝busybox.tar.bz2压缩文件，替换/bin;/sbin下的工具。
+3.取消手动登录，拷贝mingetty到/sbin,login到/bin文件下，修改/etc/inittab脚本,调整为自动登录。
+4.调整config文件base_ip参数以便于调试
+#4.拷贝脚本程序AudioEMB.sh; 可执行文件repeater，monitor;配置文件config,map等到/opt文件夹下。
+#5.添加crontab任务，并配置为上电自动启动服务。（注意：记住添加清理myout.file文件任务）
+#6.在/etc/profile文件里添加TERM=vt100环境变量；添加crond服务配置命令；添加AudioEMB.sh脚本自动登录后自动执行命令。
+7.配置系统时钟并同步硬件时钟。（断电后时间会被重置）
+
+crond服务配置命令如下：
+mkdir -p /var/spool/cron/crontabs					#Edwards ADD
+cp -p /etc/crontabs/root /var/spool/cron/crontabs  	#Edwards ADD
+chmod 777 /var/spool/cron/crontabs/root				#Edwards ADD
+crond												#Edwards ADD
+echo "crond service has started"					#Edwards ADD

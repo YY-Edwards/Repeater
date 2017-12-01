@@ -1,0 +1,4 @@
+Change Component Footprint: Designator=C14 Old Footprint=RVT10 New Footprint=RVT8
+Change Component Footprint: Designator=C15 Old Footprint=RVT10 New Footprint=RVT8
+Added Room: Name=BTB CONNECTOR
+Added Room: Name=DRS_SCH-02-24

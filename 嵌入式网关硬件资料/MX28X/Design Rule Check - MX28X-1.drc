@@ -1,0 +1,75 @@
+Protel Design System Design Rule Check
+PCB File : C:\Users\jhdev4\Desktop\MX28X\MX28X-1.1-12-29.PcbDoc
+Date     : 2017/1/6
+Time     : 14:52:09
+
+Processing Rule : Modified Polygon (Allow modified: No), (Allow shelved: No)
+Rule Violations :0
+
+Processing Rule : Net Antennae (Tolerance=0mm) (All)
+Rule Violations :0
+
+Processing Rule : Silk primitive without silk layer
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Arc (9.109mm,120.715mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Arc (10.504mm,125.32mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Arc (28.229mm,120.715mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Arc (26.834mm,125.32mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Arc (59.219mm,125.32mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Arc (60.614mm,120.715mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Arc (42.889mm,125.32mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Arc (41.494mm,120.715mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (10.504mm,126.015mm)(26.834mm,126.015mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (3.269mm,120.015mm)(34.069mm,120.015mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (9.804mm,120.715mm)(9.804mm,125.315mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (27.534mm,120.715mm)(27.534mm,125.315mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (59.919mm,120.715mm)(59.919mm,125.315mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (42.189mm,120.715mm)(42.189mm,125.315mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (35.654mm,120.015mm)(66.454mm,120.015mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (42.889mm,126.015mm)(59.219mm,126.015mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (28.912mm,-3.109mm)(45.012mm,-3.109mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (45.012mm,-3.109mm)(45.012mm,1.651mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (28.912mm,-3.109mm)(28.912mm,1.651mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (9.1mm,-3.109mm)(9.1mm,1.651mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (25.2mm,-3.109mm)(25.2mm,1.651mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (9.1mm,-3.109mm)(25.2mm,-3.109mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (126.437mm,-3.175mm)(126.437mm,11.425mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (126.437mm,-3.175mm)(135.437mm,-3.175mm)  Top Overlay
+   Violation between Silk To Board Region Clearance (Out of silkscreen region) : Track (135.437mm,-3.175mm)(135.437mm,5.125mm)  Top Overlay
+Rule Violations :25
+
+Processing Rule : Silk to Silk (Clearance=0mm) (All),(All)
+Rule Violations :0
+
+Processing Rule : Silk To Solder Mask (Clearance=0mm) (IsPad),(All)
+Rule Violations :0
+
+Processing Rule : Minimum Solder Mask Sliver (Gap=0mm) (All),(All)
+Rule Violations :0
+
+Processing Rule : Hole To Hole Clearance (Gap=0.203mm) (All),(All)
+Rule Violations :0
+
+Processing Rule : Hole Size Constraint (Min=0.025mm) (Max=3.81mm) (All)
+Rule Violations :0
+
+Processing Rule : Height Constraint (Min=0mm) (Max=25.4mm) (Prefered=12.7mm) (All)
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=0.152mm) (Max=25.4mm) (Preferred=0.254mm) (All)
+Rule Violations :0
+
+Processing Rule : Power Plane Connect Rule(Relief Connect )(Expansion=0.508mm) (Conductor Width=0.254mm) (Air Gap=0.254mm) (Entries=4) (All)
+Rule Violations :0
+
+Processing Rule : Clearance Constraint (Gap=0.152mm) (All),(All)
+Rule Violations :0
+
+Processing Rule : Un-Routed Net Constraint ( (All) )
+Rule Violations :0
+
+Processing Rule : Short-Circuit Constraint (Allowed=No) (All),(All)
+Rule Violations :0
+
+
+Violations Detected : 25
+Time Elapsed        : 00:00:04

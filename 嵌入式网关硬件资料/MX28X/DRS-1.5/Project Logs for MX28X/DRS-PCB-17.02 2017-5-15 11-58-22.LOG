@@ -1,0 +1,21 @@
+Removed Member From Class: ClassName=DRS_SCH-02-24 Member=R1
+Removed Member From Class: ClassName=DRS_SCH-02-24 Member=R2
+Removed Member From Class: ClassName=BTB CONNECTOR Member=R4
+Added Component: Designator=R13(0603)
+Added Component: Designator=R14(0603)
+Added Pin To Net: NetName=NetJ5_10 Pin=R5-1
+Added Pin To Net: NetName=DGND Pin=R5-2
+Added Pin To Net: NetName=VDD_3V3 Pin=R6-1
+Added Pin To Net: NetName=NetJ5_12 Pin=R6-2
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component C15 470UF
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component C16 1uF
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component D6 P4SMAJ5A
+Added Member To Class: ClassName=BTB CONNECTOR Member=Component R2 4.7K
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R13 470R
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R14 470R
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R22 2.7K
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R24 10K
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R25 10K
+Added Member To Class: ClassName=DRS_SCH-02-24 Member=Component R27 0R
+Added Room: Name=BTB CONNECTOR
+Added Room: Name=DRS_SCH-02-24
