@@ -107,6 +107,8 @@ MyRepeater::~MyRepeater()
 
 	fprintf(stderr, "Exit Repeater\n");
 
+	closelog();
+
 }
 
 

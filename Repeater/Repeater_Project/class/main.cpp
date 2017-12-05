@@ -22,13 +22,19 @@ void signal_handler(int signo)
 int main(void)
 {
 
-	fprintf(stderr,"\n/***********************V1.0.4.3******************************/\n");
-
-	fprintf(stderr,"\n/****************Repeater main() is running*******************/\n");
-
 	signal(SIGINT, signal_handler);
 	signal(SIGTERM, signal_handler);
 	signal(SIGABRT, signal_handler);
+
+	openlog("Repeater_App", LOGC_CONS | LOG_PID, LOG_LOCAL7);
+
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "\n/********************APP_Version:1.0.5.0******************************/\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "/*******************Repeater main() is running*******************/\n");
+
+	//fprintf(stderr, "\n/***********************V1.0.4.3******************************/\n");
+
+	//fprintf(stderr, "\n/****************Repeater main() is running*******************/\n");
+
 
 	my_repeater->Start();
 

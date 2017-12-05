@@ -32,6 +32,7 @@
 #include <poll.h>
 #include <signal.h> 
 #include <stdint.h>
+#include <syslog.h>
 
 
 typedef enum
