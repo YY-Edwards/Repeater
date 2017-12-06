@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <stdint.h>
+#include <syslog.h>
 
 using namespace jrtplib;
 using namespace std;

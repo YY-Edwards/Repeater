@@ -9,6 +9,7 @@
 #include <string>
 #include <sstream>
 #include <list>
+#include <syslog.h>
 
 #define DeviceType (unsigned char)0x00//master or peer 
 #define PeerDevice (unsigned char)0x00 

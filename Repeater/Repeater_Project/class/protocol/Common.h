@@ -13,6 +13,8 @@
 #include <unistd.h>
 #include <map>
 #include <semaphore.h>  
+#include <syslog.h>
+
 #define                    UDPPORT                              9000
 #define                    BUFLENGTH                            1024
 #define                    REGISTER                             0

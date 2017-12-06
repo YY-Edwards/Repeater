@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <stdint.h>
 #include "MFile.h"
+#include <syslog.h>
 
 
 class Monitor_Interface 

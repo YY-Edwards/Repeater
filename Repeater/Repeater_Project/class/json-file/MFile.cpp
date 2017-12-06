@@ -38,7 +38,8 @@ MFile::~MFile()
 
 	pthread_mutex_destroy(&m_configMutex);
 	pthread_mutex_destroy(&m_mapMutex);
-	fprintf(stderr,"delete class MFile\n");
+	//fprintf(stderr,"delete class MFile\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "delete class: MFile\n");
 }
 
 //int MFile::SaveConfig(int type, char *pValue)
@@ -171,12 +172,14 @@ int MFile::saveConfig()
 	/*按特定格式压缩*/
 	CompressionConfig(buf);
 
-	fprintf(stderr,"save config:\n");
+	//fprintf(stderr,"save config:\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "save config:\n");
 	std::map<int, std::string>::iterator itTemp = m_config.begin();
 	for (; itTemp != m_config.end(); itTemp++)
 	{
 		//fprintf(stderr,"tag4\n");
-		fprintf(stderr,"DeviceType:0x%02x,Value:%s\n", itTemp->first, itTemp->second.c_str());
+		//fprintf(stderr,"DeviceType:0x%02x,Value:%s\n", itTemp->first, itTemp->second.c_str());
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "DeviceType:0x%02x,Value:%s\n", itTemp->first, itTemp->second.c_str());
 	}
 
 	/*写入文件*/
@@ -230,7 +233,8 @@ int MFile::Start()
 	m_configFd = open(CONFIG_PATH, O_RDONLY);
 	if (m_configFd == -1)
 	{
-		fprintf(stderr,"config open error\n");
+		//fprintf(stderr,"config open error\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "config open error\n");
 		return 1;
 	}
 	//m_configFd = fd;
@@ -238,7 +242,8 @@ int MFile::Start()
 	m_mapFd = open(MAP_PATH, O_RDWR | O_CREAT); 
 	if (m_mapFd == -1)
 	{
-		fprintf(stderr,"map open error\n");
+		//fprintf(stderr,"map open error\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "map open error\n");
 		return 1;
 	}
 
@@ -269,7 +274,8 @@ void * MFile::readMapFun(void* args)
 	MFile *p = (MFile*)args;
 	if (p)
 	{
-		fprintf(stderr,"MFile::readMapFun run\n");
+		//fprintf(stderr,"MFile::readMapFun run\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "MFile::readMapFun run\n");
 		p->readMap();
 	}
 	return ((void *)0); // 自动退出线程
@@ -312,7 +318,8 @@ int MFile::AnalysisConfig(char *p, int length)
 		//fprintf(stderr,"key:%s,value:%s\n", key.c_str(), value.c_str());
 		updateConfig(key, value, isChange);
 	}
-	fprintf(stderr,"read config:\n");
+	//fprintf(stderr,"read config:\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "read config:\n");
 	std::map<int, std::string>::iterator itTemp = m_config.begin();
 	for (; itTemp != m_config.end(); itTemp++)
 	{
@@ -664,7 +671,8 @@ int MFile::SaveMap(std::map<std::string, std::string> mapS)
 		/* 重新设置文件偏移量 */
 		lseek(m_mapFd, 0, SEEK_SET);
 
-		fprintf(stderr, "reset map okay\n");
+		//fprintf(stderr, "reset map okay\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "reset map okay\n");
 	
 	}
 
@@ -698,7 +706,8 @@ int MFile::SaveMap(std::map<std::string, std::string> mapS)
 		write(m_mapFd, json.c_str(), json.length());
 
 	}
-	fprintf(stderr,"mapJson:%s\n", json.c_str());
+	//fprintf(stderr,"mapJson:%s\n", json.c_str());
+	syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "mapJson:%s\n", json.c_str());
 	return 0;
 }
 

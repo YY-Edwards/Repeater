@@ -26,7 +26,7 @@ CProtocol::~CProtocol()
 	{
 		delete pSlave;
 	}
-	fprintf(stderr,"delete class CProtocol\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "delete class: CProtocol\n"); //fprintf(stderr, "delete class CProtocol\n");
 }
 bool CProtocol::Connect( const char * masterIp,const char* slaveIp)
 {

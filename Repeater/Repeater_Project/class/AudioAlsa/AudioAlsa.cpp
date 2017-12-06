@@ -41,7 +41,8 @@ AudioAlsa::~AudioAlsa()
 
 
 
-	fprintf(stderr,"delete class AudioAlsa\n");
+	//fprintf(stderr,"delete class AudioAlsa\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "delete class: AudioAlsa \n");
 
 }
 
@@ -70,32 +71,37 @@ void AudioAlsa::alsa_params_config()
 
 		if ((err = snd_pcm_open(&playback_handle, "plughw:0,0", SND_PCM_STREAM_PLAYBACK, 0)) < 0){
 
-			fprintf(stderr, "cannot open audio device (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot open audio device (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot open audio device (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
 		if ((err = snd_pcm_open(&capture_handle, "plughw:0,0", SND_PCM_STREAM_CAPTURE, 0)) < 0){
 
-			fprintf(stderr, "cannot open audio device  (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot open audio device  (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot open audio device  (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
 		/* 2.Allocate the snd_pcm_hw_params_t structure on the stack */
 		if ((err = snd_pcm_hw_params_malloc(&p_hwparams)) < 0){
 
-			fprintf(stderr, "cannot allocate hardware parameter structure (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot allocate hardware parameter structure (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot allocate hardware parameter structure (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
 		if ((err = snd_pcm_hw_params_malloc(&c_hwparams)) < 0){
 
-			fprintf(stderr, "cannot allocate hardware parameter structure (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot allocate hardware parameter structure (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot allocate hardware parameter structure (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
 		if ((err = snd_pcm_sw_params_malloc(&p_swparams)) < 0){
 
-			fprintf(stderr, "cannot allocate software parameter structure (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot allocate software parameter structure (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot allocate software parameter structure (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
@@ -103,25 +109,29 @@ void AudioAlsa::alsa_params_config()
 		/* 3.Init hw_params */
 		if ((err = snd_pcm_hw_params_any(playback_handle, p_hwparams)) < 0){
 
-			fprintf(stderr, "cannot initialize playback hardware parameter structure (%s) \n ", snd_strerror(err));
+			//fprintf(stderr, "cannot initialize playback hardware parameter structure (%s) \n ", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot initialize playback hardware parameter structure (%s) \n ", snd_strerror(err));
 			exit(1);
 		}
 
 		if ((err = snd_pcm_hw_params_any(capture_handle, c_hwparams)) < 0){
 
-			fprintf(stderr, "cannot initialize capture hardware parameter structure (%s) \n ", snd_strerror(err));
+			//fprintf(stderr, "cannot initialize capture hardware parameter structure (%s) \n ", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot initialize capture hardware parameter structure (%s) \n ", snd_strerror(err));
 			exit(1);
 		}
 
 		/* 4.Set access type */
 		if ((err = snd_pcm_hw_params_set_access(playback_handle, p_hwparams,
 			SND_PCM_ACCESS_RW_INTERLEAVED)) < 0){
-			fprintf(stderr, "cannot set playback access type (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot set playback access type (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set playback access type (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 		if ((err = snd_pcm_hw_params_set_access(capture_handle, c_hwparams,
 			SND_PCM_ACCESS_RW_INTERLEAVED)) < 0){
-			fprintf(stderr, "cannot set capture access type (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot set capture access type (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set capture access type (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
@@ -129,13 +139,15 @@ void AudioAlsa::alsa_params_config()
 		/* 5.Set sample format */
 		if ((err = snd_pcm_hw_params_set_format(playback_handle, p_hwparams,
 			SND_PCM_FORMAT_S16_LE)) < 0){
-			fprintf(stderr, "cannot set playback sample format (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot set playback sample format (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set playback sample format (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
 		if ((err = snd_pcm_hw_params_set_format(capture_handle, c_hwparams,
 			SND_PCM_FORMAT_S16_LE)) < 0){
-			fprintf(stderr, "cannot set capture sample format (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot set capture sample format (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set capture sample format (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
@@ -146,32 +158,38 @@ void AudioAlsa::alsa_params_config()
 
 		if ((err = snd_pcm_hw_params_set_rate_near(playback_handle, p_hwparams, &rate, 0)) < 0) {
 
-			fprintf(stderr, "cannot set playback sample rate (%s)\n", snd_strerror(err));
+			//fprintf(stderr, "cannot set playback sample rate (%s)\n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set playback sample rate (%s)\n", snd_strerror(err));
 			exit(1);
 		}
 		if (rate != 8000) {
-			fprintf(stderr, "The rate %d Hz is not supported by your hardware. Using %d Hz instead.\n", 8000, rate);
+			//fprintf(stderr, "The rate %d Hz is not supported by your hardware. Using %d Hz instead.\n", 8000, rate);
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "The rate %d Hz is not supported by your hardware. Using %d Hz instead.\n", 8000, rate);
 		}
 
 		if ((err = snd_pcm_hw_params_set_rate_near(capture_handle, c_hwparams, &rate, 0)) < 0) {
-			fprintf(stderr, "cannot set capture sample rate (%s)\n", snd_strerror(err));
+			//fprintf(stderr, "cannot set capture sample rate (%s)\n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set capture sample rate (%s)\n", snd_strerror(err));
 			exit(1);
 		}
 		if (rate != 8000) {
-			fprintf(stderr, "The rate %d Hz is not supported by your hardware. Using %d Hz instead.\n", 8000, rate);
+			//fprintf(stderr, "The rate %d Hz is not supported by your hardware. Using %d Hz instead.\n", 8000, rate);
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "The rate %d Hz is not supported by your hardware. Using %d Hz instead.\n", 8000, rate);
 		}
 
 
 		/* 7.Set channel count */
 		if ((err = snd_pcm_hw_params_set_channels(playback_handle, p_hwparams, 1)) < 0){
 
-			fprintf(stderr, "cannot set channel count (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot set channel count (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set channel count (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
 		if ((err = snd_pcm_hw_params_set_channels(capture_handle, c_hwparams, 1)) < 0){
 
-			fprintf(stderr, "cannot set channel count (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot set channel count (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set channel count (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
@@ -202,37 +220,41 @@ void AudioAlsa::alsa_params_config()
 		periodsize = periodsize*periods;
 		err = snd_pcm_hw_params_set_buffer_size_near(playback_handle, p_hwparams, &periodsize);
 		if (err < 0){
-			fprintf(stderr, "Unable to set buffer_size %ld : %s\n", periodsize, snd_strerror(err));
+			//fprintf(stderr, "Unable to set buffer_size %ld : %s\n", periodsize, snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "Unable to set buffer_size %ld : %s\n", periodsize, snd_strerror(err));
 			exit(1);
 		}
 		err = snd_pcm_hw_params_set_buffer_size_near(capture_handle, c_hwparams, &periodsize);
 		if (err < 0){
-			fprintf(stderr, "Unable to set buffer_size %ld : %s\n", periodsize, snd_strerror(err));
+			//fprintf(stderr, "Unable to set buffer_size %ld : %s\n", periodsize, snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "Unable to set buffer_size %ld : %s\n", periodsize, snd_strerror(err));
 			exit(1);
 		}
 
 		periodsize = periodsize/periods;
 		err = snd_pcm_hw_params_set_period_size_near(playback_handle, p_hwparams, &periodsize, 0);
 		if (err < 0){
-			fprintf(stderr, "Unable to set periodsize %ld : %s\n", periodsize, snd_strerror(err));
+			//fprintf(stderr, "Unable to set periodsize %ld : %s\n", periodsize, snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "Unable to set periodsize %ld : %s\n", periodsize, snd_strerror(err));
 			exit(1);
 		}
 
 		err = snd_pcm_hw_params_set_period_size_near(capture_handle, c_hwparams, &periodsize, 0);
 		if (err < 0){
-			fprintf(stderr, "Unable to set periodsize %ld : %s\n", periodsize, snd_strerror(err));
+			//fprintf(stderr, "Unable to set periodsize %ld : %s\n", periodsize, snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "Unable to set periodsize %ld : %s\n", periodsize, snd_strerror(err));
 			exit(1);
 		}
 
 		err = snd_pcm_hw_params_get_buffer_time(c_hwparams, &capture_buffer_time, 0);
-		fprintf(stderr,"capture_buffer_time is : %d us\n", capture_buffer_time);
+		//fprintf(stderr,"capture_buffer_time is : %d us\n", capture_buffer_time);
 		err = snd_pcm_hw_params_get_buffer_time(p_hwparams, &playback_buffer_time, 0);
-		fprintf(stderr,"playback_buffer_time is : %d us\n", playback_buffer_time);
+		//fprintf(stderr,"playback_buffer_time is : %d us\n", playback_buffer_time);
 
 		err = snd_pcm_hw_params_get_period_time(c_hwparams, &capture_period_time, 0);
-		fprintf(stderr,"capture_period_time is : %d us \n", capture_period_time);
+		//fprintf(stderr,"capture_period_time is : %d us \n", capture_period_time);
 		err = snd_pcm_hw_params_get_period_time(p_hwparams, &playback_period_time, 0);
-		fprintf(stderr,"playback_period_time is : %d us \n", playback_period_time);
+		//fprintf(stderr,"playback_period_time is : %d us \n", playback_period_time);
 
 		/**/
 
@@ -242,21 +264,25 @@ void AudioAlsa::alsa_params_config()
 		capture_can_pause = snd_pcm_hw_params_can_pause(c_hwparams);
 
 		if (!capture_can_pause) {
-			fprintf(stderr, "\rCapture PAUSE command ignored (no hw support)\n");
+			//fprintf(stderr, "\rCapture PAUSE command ignored (no hw support)\n");
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "\rCapture PAUSE command ignored (no hw support)\n");
 		}
 		if (!playback_can_pause) {
-			fprintf(stderr, "\rPlayback PAUSE command ignored (no hw support)\n");
+			//fprintf(stderr, "\rPlayback PAUSE command ignored (no hw support)\n");
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "\rPlayback PAUSE command ignored (no hw support)\n");
 		}
 
 
 		/* 8.Set hw_params */
 		if ((err = snd_pcm_hw_params(playback_handle, p_hwparams)) < 0){
-			fprintf(stderr, "cannot set parameters (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot set parameters (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set parameters (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
 		if ((err = snd_pcm_hw_params(capture_handle, c_hwparams)) < 0){
-			fprintf(stderr, "cannot set parameters (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot set parameters (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set parameters (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
@@ -299,13 +325,15 @@ void AudioAlsa::alsa_params_config()
 
 		/*9.Return current software configuration for a playback_handle */
 		if ((err = snd_pcm_sw_params_current(playback_handle, p_swparams)) < 0){
-			fprintf(stderr, "cannot get playback_handle sw parameters (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot get playback_handle sw parameters (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot get playback_handle sw parameters (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
 		///*10.Set start threshold */
 		if ((err = snd_pcm_sw_params_set_start_threshold(playback_handle, p_swparams, 1)) < 0){
-			fprintf(stderr, "cannot set start_threshold (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot set start_threshold (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot set start_threshold (%s) \n", snd_strerror(err));
 			exit(1);
 		}
 
@@ -314,7 +342,8 @@ void AudioAlsa::alsa_params_config()
 		///*11.get boundary for ring  */
 		if ((err = snd_pcm_sw_params_get_boundary(p_swparams, &p_boundary))<0)
 		{
-			fprintf(stderr, "sw params get boundary failed, errorcode = %s", snd_strerror(err));
+			//fprintf(stderr, "sw params get boundary failed, errorcode = %s", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "sw params get boundary failed, errorcode = %s", snd_strerror(err));
 			exit(1);
 		}
 		//fprintf(stderr, " get p_boundary: %ld \n", p_boundary);
@@ -322,20 +351,23 @@ void AudioAlsa::alsa_params_config()
 		/*12.disable underrun reporting */
 		if ((err = snd_pcm_sw_params_set_stop_threshold(playback_handle, p_swparams, p_boundary))<0)
 		{
-			fprintf(stderr, "sw params stop threshold failed, errorcode = %s", snd_strerror(err));
+			//fprintf(stderr, "sw params stop threshold failed, errorcode = %s", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "sw params stop threshold failed, errorcode = %s", snd_strerror(err));
 			exit(1);
 		}
 
 		///*13.play silence when there is an underrun */
 		if ((err = snd_pcm_sw_params_set_silence_size(playback_handle, p_swparams, p_boundary))<0)
 		{
-			fprintf(stderr, "sw params set silence size failed, errorcode = %s", snd_strerror(err));
+		//	fprintf(stderr, "sw params set silence size failed, errorcode = %s", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "sw params set silence size failed, errorcode = %s", snd_strerror(err));
 			exit(1);
 		}
 
 		if ((err = snd_pcm_sw_params(playback_handle, p_swparams))<0)
 		{
-			fprintf(stderr, "sw params failed, errorcode = %s", snd_strerror(err));
+			//fprintf(stderr, "sw params failed, errorcode = %s", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "sw params failed, errorcode = %s", snd_strerror(err));
 			exit(1);
 		}
 
@@ -351,14 +383,16 @@ void AudioAlsa::alsa_params_config()
 		//	exit(1);
 		//}
 
-		fprintf(stderr, "alsa-audio-params config  success\n");
+		//fprintf(stderr, "alsa-audio-params config  success\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "alsa-audio-params config  success\n");
 
 }
 
 void AudioAlsa::get_record_buf(void *buff)
 {
 	if (alsa_config_flag != 1){
-		fprintf(stderr,"alsa is not configed!!!\n");
+		//fprintf(stderr,"alsa is not configed!!!\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "alsa is not configed!!!\n");
 		exit(-1);
 	}
 	int err = 0;
@@ -369,16 +403,20 @@ void AudioAlsa::get_record_buf(void *buff)
 		//首先硬件层声卡1个period时间到了，会通知内核和驱动来读/写数据，然后驱动再传输/拷贝application-buffer(内存到buffer的传输是通过DMA传输)
 		//fprintf(stderr,"3.Record transmit time: %ld,%ld \n", (end_record.tv_sec - begin_record.tv_sec), (end_record.tv_usec - begin_record.tv_usec));
 		if (err == -EPIPE){
-			fprintf(stderr, "\r\n an overrun occurred (%s) \r\n", snd_strerror(err));
+			//fprintf(stderr, "\r\n an overrun occurred (%s) \r\n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "\r\n an overrun occurred (%s) \r\n", snd_strerror(err));
 			if ((err = snd_pcm_prepare(capture_handle)) < 0){
-				fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+				//fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+				syslog(LOG_LOCAL7 | LOG_DEBUG |LOG_INFO, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
 			}
 		}
 		else if (err == -EBADFD){
-			fprintf(stderr, "PCM is not in the right state (%s)\n", snd_strerror(err));
+			//fprintf(stderr, "PCM is not in the right state (%s)\n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "PCM is not in the right state (%s)\n", snd_strerror(err));
 		}
 		else if (err == -ESTRPIPE){
-			fprintf(stderr, "a suspend event occurred (%s)\n", snd_strerror(err));
+			//fprintf(stderr, "a suspend event occurred (%s)\n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "a suspend event occurred (%s)\n", snd_strerror(err));
 		}
 		else{
 
@@ -396,30 +434,35 @@ int8_t AudioAlsa::send_buf_playback(void *inputbuf)
 
 	if (err == -EPIPE){
 		/* EPIPE means underrun */
-		fprintf(stderr, "\r\n underrun occurred \r\n");
+		//fprintf(stderr, "\r\n underrun occurred \r\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "\r\n underrun occurred \r\n");
 		/* Finish hardware parameters set ,and make device prepared */
 		if ((err_p = snd_pcm_prepare(playback_handle)) < 0){
-			fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+			//fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
 		}
 		//fprintf(stderr, "underrun err value is :%d \n", err);
 		return err;
 	}
 	else if (err == -EBADFD){
 
-		fprintf(stderr, "write:EBADFD  failed (%s)\n", snd_strerror(err));
+		//fprintf(stderr, "write:EBADFD  failed (%s)\n", snd_strerror(err));
+		syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "write:EBADFD  failed (%s)\n", snd_strerror(err));
 		err = snd_pcm_state(playback_handle);
 
 		switch (err){
 
 			case SND_PCM_STATE_SETUP:
 
-				fprintf(stderr,"pcm state is : SNDRV_PCM_STATE_SETUP\n");
+				//fprintf(stderr,"pcm state is : SNDRV_PCM_STATE_SETUP\n");
+				syslog(LOG_LOCAL7 | LOG_DEBUG, "pcm state is : SNDRV_PCM_STATE_SETUP\n");
 				snd_pcm_prepare(playback_handle);
 				break;
 
 			case SND_PCM_STATE_SUSPENDED:
 
-				fprintf(stderr,"pcm state is : SNDRV_PCM_STATE_SUSPENDED\n");
+				//fprintf(stderr,"pcm state is : SNDRV_PCM_STATE_SUSPENDED\n");
+				syslog(LOG_LOCAL7 | LOG_DEBUG, "pcm state is : SNDRV_PCM_STATE_SUSPENDED\n");
 				while ((err = snd_pcm_resume(playback_handle)) == -EAGAIN)
 					sleep(1);
 
@@ -429,7 +472,8 @@ int8_t AudioAlsa::send_buf_playback(void *inputbuf)
 
 			default:
 
-				fprintf(stderr,"unkonow err \n");
+				//fprintf(stderr,"unkonow err \n");
+				syslog(LOG_LOCAL7 | LOG_DEBUG, "unkonow err \n");
 				break;
 
 			}
@@ -437,12 +481,14 @@ int8_t AudioAlsa::send_buf_playback(void *inputbuf)
 
 	else if (err == -ESTRPIPE){
 
-			fprintf(stderr, "write:ESTRPIPE failed (%s)\n", snd_strerror(err));
+			//fprintf(stderr, "write:ESTRPIPE failed (%s)\n", snd_strerror(err));
+		    syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "write:ESTRPIPE failed (%s)\n", snd_strerror(err));
 			while ((err = snd_pcm_resume(playback_handle)) == -EAGAIN)
 				sleep(1);
 			if (err < 0){
 				err = snd_pcm_prepare(playback_handle);
-				if (err < 0)fprintf(stderr,"can not recovery\n");
+				if (err < 0) syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "can not recovery\n");
+					//fprintf(stderr,"can not recovery\n");
 				//break;
 			}
 	}
@@ -457,11 +503,13 @@ void AudioAlsa::do_pause(uint8_t action)
 	int err;
 
 	if (!playback_can_pause) {
-		fprintf(stderr, "\rPAUSE command ignored (no hw support)\n");
+		//fprintf(stderr, "\rPAUSE command ignored (no hw support)\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "\rPAUSE command ignored (no hw support)\n");
 		return;
 	}
 	if (!capture_can_pause) {
-		fprintf(stderr, "\rPAUSE command ignored (no hw support)\n");
+		//fprintf(stderr, "\rPAUSE command ignored (no hw support)\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "\rPAUSE command ignored (no hw support)\n");
 		return;
 	}
 

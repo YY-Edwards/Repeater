@@ -9,7 +9,8 @@ MyRepeater *my_repeater = new MyRepeater;
 
 void signal_handler(int signo)
 {
-	fprintf(stderr, "\nHave caught sig N.O. %d\n", signo);
+	//fprintf(stderr, "\nHave caught sig N.O. %d\n", signo);
+	syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "\nHave caught sig N.O. %d\n", signo);
 
 	signal(signo, SIG_DFL);
 
@@ -26,13 +27,10 @@ int main(void)
 	signal(SIGTERM, signal_handler);
 	signal(SIGABRT, signal_handler);
 
-	openlog("Repeater_App", LOGC_CONS | LOG_PID, LOG_LOCAL7);
-
-	syslog(LOG_LOCAL7 | LOG_DEBUG, "\n/********************APP_Version:1.0.5.0******************************/\n");
-	syslog(LOG_LOCAL7 | LOG_DEBUG, "/*******************Repeater main() is running*******************/\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "/***APP_Version:1.0.5.0 \n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "/***Repeater main() is running \n");
 
 	//fprintf(stderr, "\n/***********************V1.0.4.3******************************/\n");
-
 	//fprintf(stderr, "\n/****************Repeater main() is running*******************/\n");
 
 

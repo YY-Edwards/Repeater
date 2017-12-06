@@ -46,7 +46,8 @@ GPIO_App::~GPIO_App()
 	gpio_unexport(LINE_OUT_AUD_SEL1);
 	gpio_unexport(LINE_OUT_AUD_SEL2);*/
 
-	fprintf(stderr,"delete class GPIO_App\n");
+	//fprintf(stderr,"delete class GPIO_App\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "delete class: GPIO_App\n");
 
 }
 
@@ -73,7 +74,8 @@ GPIO_App::~GPIO_App()
 
 void GPIO_App::config_GPIO(uint8_t port)
 {
-	fprintf(stderr,"config GPIO...\n");
+	//fprintf(stderr,"config GPIO...\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "config GPIO...\n");
 	if (gpio_config_flag == 0)
 		gpio_config_flag = 1;
 
@@ -363,7 +365,8 @@ void GPIO_App::config_GPIO(uint8_t port)
 uint8_t GPIO_App::port_b_ptt_onoff(uint8_t action)
 {
 	if (gpio_config_flag != 1){
-		fprintf(stderr, "gpio is not configed!!!\n");
+		//fprintf(stderr, "gpio is not configed!!!\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "gpio is not configed!!!\n");
 		exit(-1);
 	}
 
@@ -400,7 +403,8 @@ uint8_t GPIO_App::ptt_onoff(uint8_t action)
 {
 	
 	if (gpio_config_flag != 1){
-		fprintf(stderr,"gpio is not configed!!!\n");
+		//fprintf(stderr,"gpio is not configed!!!\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "gpio is not configed!!!\n");
 		exit(-1);
 	}
 		
@@ -413,7 +417,8 @@ uint8_t GPIO_App::ptt_onoff(uint8_t action)
 
 	case 0://PTT-off
 
-		fprintf(stderr,"ptt  disabled...\n");
+		//fprintf(stderr,"ptt  disabled...\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "ptt  disabled...\n");
 		gpio_set_value(gpio_ptt_pin, HIGH_LEVEL);//disable ptt out 
 
 		break;
@@ -421,7 +426,8 @@ uint8_t GPIO_App::ptt_onoff(uint8_t action)
 	case 1://PTT-on
 
 		gpio_set_value(gpio_ptt_pin, LOW_LEVEL);//enable ptt out
-		fprintf(stderr,"ptt  enable...\n");
+		//fprintf(stderr,"ptt  enable...\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "ptt  enable...\n");
 
 		break;
 
@@ -440,7 +446,8 @@ uint8_t GPIO_App::get_cd_current_value()
 {
 	
 	if (gpio_config_flag != 1){
-		fprintf(stderr,"gpio is not configed!!!\n");
+		//fprintf(stderr,"gpio is not configed!!!\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "gpio is not configed!!!\n");
 		exit(-1);
 	}
 

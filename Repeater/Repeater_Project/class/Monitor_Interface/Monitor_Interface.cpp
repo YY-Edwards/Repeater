@@ -32,7 +32,8 @@ Monitor_Interface::Monitor_Interface()
 Monitor_Interface::~Monitor_Interface()
 {
 	if (p_file != NULL)delete p_file;
-	fprintf(stderr,"delete class Monitor_Interface\n");
+	//fprintf(stderr,"delete class Monitor_Interface\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "delete class: Monitor_Interface\n");
 
 
 }
@@ -43,7 +44,8 @@ void Monitor_Interface::config_hw_repeater()
 
 	//fprintf(stderr,"Read config file...\n");
 	read_config_file();
-	fprintf(stderr,"config Reapeater hw...\n");
+	//fprintf(stderr,"config Reapeater hw...\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "config Reapeater hw...\n");
 
 	sprintf(tmp,"ifconfig eth0 hw ether %s", MAC);//config MAC
 	system(tmp);
@@ -115,7 +117,7 @@ void Monitor_Interface::read_config_file()
 			isMaster = true;
 	}
 	else 
-		fprintf(stderr,"p_file->GetConfig:DeviceType err...\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "p_file->GetConfig:DeviceType err...\n");//fprintf(stderr,"p_file->GetConfig:DeviceType err...\n");
 
 	bzero(data, sizeof(data));
 
@@ -183,7 +185,7 @@ void Monitor_Interface::read_config_file()
 		//memcpy(base_ip_str, data, strlen(data));
 	}
 	else
-		fprintf(stderr,"p_file->GetConfig:DeviceIP  err...\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "p_file->GetConfig:DeviceIP  err...\n");//fprintf(stderr,"p_file->GetConfig:DeviceIP  err...\n");
 
 	bzero(data, sizeof(data));
 
@@ -195,7 +197,7 @@ void Monitor_Interface::read_config_file()
 		master_ip_str = data;
 	}
 	else
-		fprintf(stderr,"p_file->GetConfig:MasterIP  err...\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "p_file->GetConfig:MasterIP  err...\n");//fprintf(stderr,"p_file->GetConfig:MasterIP  err...\n");
 
 	bzero(data, sizeof(data));
 
@@ -222,7 +224,7 @@ void Monitor_Interface::read_config_file()
 			, tempMac[5]);
 	}
 	else
-		fprintf(stderr,"p_file->GetConfig:DeviceMac  err...\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "p_file->GetConfig:DeviceMac  err...\n");//fprintf(stderr,"p_file->GetConfig:DeviceMac  err...\n");
 
 	bzero(data, sizeof(data));
 
@@ -233,7 +235,7 @@ void Monitor_Interface::read_config_file()
 		strcpy(gateway_ip, data);
 	}
 	else
-		fprintf(stderr, "p_file->GetConfig:GatewayIP  err...\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "p_file->GetConfig:GatewayIP  err...\n");//fprintf(stderr, "p_file->GetConfig:GatewayIP  err...\n");
 
 	bzero(data, sizeof(data));
 
@@ -243,7 +245,7 @@ void Monitor_Interface::read_config_file()
 		strcpy(subnetmask, data);
 	}
 	else
-		fprintf(stderr, "p_file->GetConfig:Subnetmask  err...\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "p_file->GetConfig:Subnetmask  err...\n");//fprintf(stderr, "p_file->GetConfig:Subnetmask  err...\n");
 
 	bzero(data, sizeof(data));
 
@@ -254,7 +256,7 @@ void Monitor_Interface::read_config_file()
 		strcpy(switch_ip, data);
 	}
 	else
-		fprintf(stderr, "p_file->GetConfig:SwitchIP  err...\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "p_file->GetConfig:SwitchIP  err...\n");//fprintf(stderr, "p_file->GetConfig:SwitchIP  err...\n");
 
 	bzero(data, sizeof(data));
 
@@ -270,7 +272,8 @@ bool Monitor_Interface::write_map_file()
 
 	if (config_hw_repeater_flag != 1){
 
-		fprintf(stderr,"repeater is not configed");
+		//fprintf(stderr,"repeater is not configed");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "repeater is not configed\n");
 		exit(-1);
 	}
 	FILE *fp = fopen("/opt/map", "wb+");

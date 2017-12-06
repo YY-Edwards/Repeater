@@ -17,7 +17,7 @@ AudioQueue::AudioQueue()
 	}
 	fifo_counter = 0;
 
-	fprintf(stderr,"init queue mutex, sem...\n");
+	//fprintf(stderr,"init queue mutex, sem...\n");
 	
 }
 AudioQueue::~AudioQueue()
@@ -27,7 +27,7 @@ AudioQueue::~AudioQueue()
 	//m_list.erase(i);
 	pthread_mutex_destroy(&m_hLocker);
 
-	fprintf(stderr,"delete class AudioQueue\n");
+	//fprintf(stderr,"delete class AudioQueue\n");
 	
 }
 
@@ -37,7 +37,7 @@ void AudioQueue::ClearQueue()
 	pthread_mutex_lock(&m_hLocker);//µÈ´ý»¥³â¾ä±ú´¥·¢
 	m_list.clear();
 	pthread_mutex_unlock(&m_hLocker);//µÈ´ý»¥³â¾ä±ú´¥·¢
-	fprintf(stderr, "clear Queue okay\n");
+	//fprintf(stderr, "clear Queue okay\n");
 
 }
 

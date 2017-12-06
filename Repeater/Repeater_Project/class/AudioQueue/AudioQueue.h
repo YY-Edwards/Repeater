@@ -17,6 +17,7 @@
 #include <list>
 #include <stdint.h>
 #include <sys/time.h>
+#include <syslog.h>
 
 class RepeaterAudioPacket
 {

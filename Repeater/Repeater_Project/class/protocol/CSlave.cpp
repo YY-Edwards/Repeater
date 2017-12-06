@@ -30,14 +30,16 @@ CSlave::~CSlave()
 	pthread_mutex_destroy(&m_mapLocker);
 
 	sem_destroy(&sem);
-	fprintf(stderr, "delete class CSlave\n");
+	//fprintf(stderr, "delete class CSlave\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "delete class: CSlave\n");
 }
 bool CSlave::Connect(const char* masterIp, const char* slaveIp)
 {
 	isRecvStatus = true;
 	this->masterIp = masterIp;
 	this->slaveIp = slaveIp;
-	fprintf(stderr,"connect slave\n");
+	//fprintf(stderr,"connect slave\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "connect slave\n");
 	return InitSocket();
 }
 void CSlave::SetCallBackFunc(void(*callBackFunc)(int, ResponeData))
@@ -192,7 +194,8 @@ void CSlave::RecvThreadFunc()
 			switch (static_cast<char>(recvBuf[0]))
 			{
 			case static_cast<char>(mapOpcode) :
-				fprintf(stderr,"recvmap\n");
+				//fprintf(stderr,"recvmap\n");
+				syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "recvmap\n");
 				isRecvedmap = true;
 				isSendAlive = true;   //开启心跳线程
 				mapCount = recvBuf[1];
@@ -200,14 +203,16 @@ void CSlave::RecvThreadFunc()
 				break;
 			case static_cast<char>(AliveOpcode):
 				//fprintf(stderr,"recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
-					fprintf(stderr, "recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
+					//fprintf(stderr, "recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
+					syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
 					localtime(&t);
 					pthread_mutex_lock(&lastRecvAliveTimeLocker);
 					strftime(lastRecvAliveTime, sizeof(lastRecvAliveTime), "%Y-%m-%d %H:%M:%S", localtime(&t));
 					pthread_mutex_unlock(&lastRecvAliveTimeLocker);
 				break;
 			case static_cast<char>(SetChannelStatusOpcode):
-				fprintf(stderr,"recvSetChannelStatus\n");
+				//fprintf(stderr,"recvSetChannelStatus\n");
+				syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "recvSetChannelStatus\n");
 				pthread_mutex_lock(&m_statusLocker);
 				isGetStatus = false;
 				pthread_mutex_unlock(&m_statusLocker);
@@ -419,7 +424,8 @@ void CSlave::Sendmap2Repeater(int mapCount)
 		char tmp[64];
 		strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
 		slavemap[strIp] = tmp;
-		fprintf(stderr,"slave :%s\n",strIp.c_str());
+		//fprintf(stderr,"slave :%s\n",strIp.c_str());
+		syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "slave :%s\n", strIp.c_str());
 	}
 	pthread_mutex_unlock(&m_mapLocker);
 	if (myCallBackFunc != NULL)
@@ -463,7 +469,8 @@ void CSlave::SendRegister2Master()
 	sendBuf[4] = ip[3];
 	//sscanf(slaveIp, "%c.%c.%c.%c", &sendBuf[1], &sendBuf[2], &sendBuf[3], &sendBuf[4]);
 	Send2Master(sendBuf,LENGTH);
-	fprintf(stderr,"sendRegister2Master\n");
+	//fprintf(stderr,"sendRegister2Master\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "sendRegister2Master\n");
 }
 void CSlave::SendAlive2Master()
 {
@@ -477,7 +484,8 @@ void CSlave::SendAlive2Master()
 	sendBuf[0] = static_cast<char>(AliveOpcode);
 	stringSplit(masterIp);
 	Send2Master(sendBuf,LENGTH);
-	fprintf(stderr,"sendAlive2Master\n");
+	//fprintf(stderr,"sendAlive2Master\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "sendAlive2Master\n");
 	/*
 		给每个slave 发送alive，自己除外 
 	*/
@@ -488,7 +496,8 @@ void CSlave::SendAlive2Master()
 			sendBuf[0] = static_cast<char>(ALIVE);
 			stringSplit(it->first);
 			Send2Slave(LENGTH, it->first);
-			fprintf(stderr,"sendAlive2:%s\n",(it->first).c_str());
+			//fprintf(stderr,"sendAlive2:%s\n",(it->first).c_str());
+			syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "sendAlive2:%s\n", (it->first).c_str());
 		}
 	}
 	pthread_mutex_unlock(&m_mapLocker);

@@ -11,6 +11,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "gpio.h"//gpio interface
+#include <syslog.h>
 
 //static struct pollfd *fdset;
 

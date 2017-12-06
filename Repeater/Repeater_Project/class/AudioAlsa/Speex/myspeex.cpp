@@ -31,7 +31,8 @@ Myspeex::~Myspeex()
 
 	speex_encoder_destroy(enc_state);
 	speex_bits_destroy(&enc_bits);
-	fprintf(stderr, "delete class myspeex\n");
+	//fprintf(stderr, "delete class myspeex\n");
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "delete class: myspeex \n");
 }
 
 

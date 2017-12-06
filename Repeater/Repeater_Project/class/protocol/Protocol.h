@@ -1,6 +1,7 @@
 #ifndef PROTOCOL_H
 #include "CMaster.h"
 #include "CSlave.h"
+#include <syslog.h>
 class CProtocol
 {
 public:
