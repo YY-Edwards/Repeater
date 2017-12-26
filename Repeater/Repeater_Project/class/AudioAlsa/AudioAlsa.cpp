@@ -407,16 +407,19 @@ void AudioAlsa::get_record_buf(void *buff)
 			syslog(LOG_LOCAL7 | LOG_DEBUG, "\r\n an overrun occurred (%s) \r\n", snd_strerror(err));
 			if ((err = snd_pcm_prepare(capture_handle)) < 0){
 				//fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
-				syslog(LOG_LOCAL7 | LOG_DEBUG |LOG_INFO, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+				syslog(LOG_LOCAL7 | LOG_INFO, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+				syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
 			}
 		}
 		else if (err == -EBADFD){
 			//fprintf(stderr, "PCM is not in the right state (%s)\n", snd_strerror(err));
-			syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "PCM is not in the right state (%s)\n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "PCM is not in the right state (%s)\n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_INFO, "PCM is not in the right state (%s)\n", snd_strerror(err));
 		}
 		else if (err == -ESTRPIPE){
 			//fprintf(stderr, "a suspend event occurred (%s)\n", snd_strerror(err));
-			syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "a suspend event occurred (%s)\n", snd_strerror(err));
+			syslog(LOG_LOCAL7  | LOG_INFO, "a suspend event occurred (%s)\n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "a suspend event occurred (%s)\n", snd_strerror(err));
 		}
 		else{
 
@@ -439,7 +442,8 @@ int8_t AudioAlsa::send_buf_playback(void *inputbuf)
 		/* Finish hardware parameters set ,and make device prepared */
 		if ((err_p = snd_pcm_prepare(playback_handle)) < 0){
 			//fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
-			syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_INFO, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_DEBUG, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
 		}
 		//fprintf(stderr, "underrun err value is :%d \n", err);
 		return err;
@@ -447,7 +451,8 @@ int8_t AudioAlsa::send_buf_playback(void *inputbuf)
 	else if (err == -EBADFD){
 
 		//fprintf(stderr, "write:EBADFD  failed (%s)\n", snd_strerror(err));
-		syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "write:EBADFD  failed (%s)\n", snd_strerror(err));
+		syslog(LOG_LOCAL7 | LOG_INFO, "write:EBADFD  failed (%s)\n", snd_strerror(err));
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "write:EBADFD  failed (%s)\n", snd_strerror(err));
 		err = snd_pcm_state(playback_handle);
 
 		switch (err){
@@ -482,12 +487,16 @@ int8_t AudioAlsa::send_buf_playback(void *inputbuf)
 	else if (err == -ESTRPIPE){
 
 			//fprintf(stderr, "write:ESTRPIPE failed (%s)\n", snd_strerror(err));
-		    syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "write:ESTRPIPE failed (%s)\n", snd_strerror(err));
+		    syslog(LOG_LOCAL7 | LOG_DEBUG , "write:ESTRPIPE failed (%s)\n", snd_strerror(err));
+			syslog(LOG_LOCAL7 | LOG_INFO, "write:ESTRPIPE failed (%s)\n", snd_strerror(err));
 			while ((err = snd_pcm_resume(playback_handle)) == -EAGAIN)
 				sleep(1);
 			if (err < 0){
 				err = snd_pcm_prepare(playback_handle);
-				if (err < 0) syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "can not recovery\n");
+				if (err < 0){
+					syslog(LOG_LOCAL7  | LOG_INFO, "can not recovery\n");
+					syslog(LOG_LOCAL7 | LOG_DEBUG , "can not recovery\n");
+				}
 					//fprintf(stderr,"can not recovery\n");
 				//break;
 			}

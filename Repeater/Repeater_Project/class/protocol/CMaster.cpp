@@ -159,13 +159,15 @@ void CMaster::RecvThreadFunc()
 			{
 			case static_cast<char>(RegisterOpcode) :
 				//fprintf(stderr,"recvRegister \n");
-				syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "recvRegister \n");
+				syslog(LOG_LOCAL7 | LOG_INFO, "recvRegister \n");
+				syslog(LOG_LOCAL7 | LOG_DEBUG, "recvRegister \n");
 				Sendmap2Repeater(rmtIp);
 				Sendmap2Slave();
 				break;
 			case static_cast<char>(AliveOpcode):
 				//fprintf(stderr,"recvAlive:%s\n", rmtIp.c_str());
-				syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "recvAlive:%s\n", rmtIp.c_str());
+				syslog(LOG_LOCAL7 | LOG_INFO, "recvAlive:%s\n", rmtIp.c_str());
+				syslog(LOG_LOCAL7 | LOG_DEBUG, "recvAlive:%s\n", rmtIp.c_str());
 				pthread_mutex_lock(&m_aliveLocker);
 				isAlive = true;
 				pthread_mutex_unlock(&m_aliveLocker);
@@ -174,7 +176,8 @@ void CMaster::RecvThreadFunc()
 				break;
 			case static_cast<char>(GetChannelStatusOpcode):
 				//fprintf(stderr,"recvGetChannelStatus\n");
-				syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "recvGetChannelStatus\n");
+				syslog(LOG_LOCAL7  | LOG_INFO, "recvGetChannelStatus\n");
+				syslog(LOG_LOCAL7 | LOG_DEBUG , "recvGetChannelStatus\n");
 				if (myCallBackFunc != NULL)
 				{
 					//fprintf(stderr,"myCallBackFunc\n");
@@ -188,7 +191,8 @@ void CMaster::RecvThreadFunc()
 				break;
 			case static_cast<char>(ReleaseChannelOpcode):
 				//fprintf(stderr,"recvReleaseChannel\n");
-				syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "recvReleaseChannel\n");
+				syslog(LOG_LOCAL7 | LOG_INFO, "recvReleaseChannel\n");
+				syslog(LOG_LOCAL7 | LOG_DEBUG, "recvReleaseChannel\n");
 				if (myCallBackFunc != NULL)
 				{
 					ResponeData r = {slavemap,"",rmtIp,RELEASECHANNNEL,-1 };
@@ -216,7 +220,8 @@ void CMaster::SendAlive2Slave(std::string slaveIp)
 	sendBuf[3] = ip[2];
 	sendBuf[4] = ip[3];
 	//fprintf(stderr, "sendAlive2Slave:%s\n", slaveIp.c_str());
-	syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "sendAlive2Slave:%s\n", slaveIp.c_str());
+	syslog(LOG_LOCAL7 | LOG_INFO, "sendAlive2Slave:%s\n", slaveIp.c_str());
+	syslog(LOG_LOCAL7 | LOG_DEBUG, "sendAlive2Slave:%s\n", slaveIp.c_str());
 	Send2Slave(sendBuf, LENGTH, slaveIp);
 }
 
@@ -324,7 +329,8 @@ void CMaster::Sendmap2Repeater(std::string rmtIp)
 	if (myCallBackFunc != NULL)
 	{
 		//fprintf(stderr,"sendMap2Repeater\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "sendMap2Repeater\n");
+		syslog(LOG_LOCAL7 | LOG_INFO, "sendMap2Repeater\n");
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "sendMap2Repeater\n");
 		ResponeData r = { slavemap,"","",INVALIDCHANNEL };
 		onData(myCallBackFunc, SLAVEMAP, r);
 		
@@ -352,13 +358,15 @@ void CMaster::Updatemap(std::string rmtIp)
 		strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
 		strptime((it->second).c_str(), "%Y-%m-%d %H:%M:%S", &tm); 
 		//fprintf(stderr,"%s,%s\n", (it->first).c_str(), (it->second).c_str());
-		syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "%s,%s\n", (it->first).c_str(), (it->second).c_str());
+		syslog(LOG_LOCAL7 | LOG_INFO, "%s,%s\n", (it->first).c_str(), (it->second).c_str());
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "%s,%s\n", (it->first).c_str(), (it->second).c_str());
 		tm_time = mktime(&tm);
 		if ((t - tm_time>60) || (t - tm_time < 0))            //超时60s则发送map,时间bug.
 		{
 			
 			 //fprintf(stderr,"updateMap2:%s\n", (it->first).c_str());
-			 syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "updateMap2:%s\n", (it->first).c_str());
+			 syslog(LOG_LOCAL7 | LOG_INFO, "updateMap2:%s\n", (it->first).c_str());
+			 syslog(LOG_LOCAL7 | LOG_DEBUG, "updateMap2:%s\n", (it->first).c_str());
 			 slavemap.erase(it++);
 			 pthread_mutex_unlock(&m_mapLocker);
 			 Sendmap2Slave();
@@ -465,7 +473,8 @@ void CMaster::Sendmap2Slave()
 	{
 		Send2Slave(sendBuf,i, (it->first).c_str());
 		//fprintf(stderr,"sendMap2:%s\n",(it->first).c_str());
-		syslog(LOG_LOCAL7 | LOG_DEBUG | LOG_INFO, "sendMap2:%s\n", (it->first).c_str());
+		syslog(LOG_LOCAL7 | LOG_INFO, "sendMap2:%s\n", (it->first).c_str());
+		syslog(LOG_LOCAL7 | LOG_DEBUG, "sendMap2:%s\n", (it->first).c_str());
 	}
 	
 	pthread_mutex_unlock(&m_mapLocker);
