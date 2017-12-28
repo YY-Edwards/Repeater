@@ -275,8 +275,7 @@ void * MFile::readMapFun(void* args)
 	if (p)
 	{
 		//fprintf(stderr,"MFile::readMapFun run\n");
-		syslog(LOG_LOCAL7  | LOG_INFO, "MFile::readMapFun run\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG , "MFile::readMapFun run\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "MFile::readMapFun run\n");
 		p->readMap();
 	}
 	return ((void *)0); // 自动退出线程
@@ -708,8 +707,7 @@ int MFile::SaveMap(std::map<std::string, std::string> mapS)
 
 	}
 	//fprintf(stderr,"mapJson:%s\n", json.c_str());
-	syslog(LOG_LOCAL7  | LOG_INFO, "mapJson:%s\n", json.c_str());
-	syslog(LOG_LOCAL7 | LOG_DEBUG, "mapJson:%s\n", json.c_str());
+	syslog(LOG_LOCAL7 | LOG_NOTICE, "mapJson:%s\n", json.c_str());
 	return 0;
 }
 

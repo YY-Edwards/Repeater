@@ -141,13 +141,11 @@ void MyRepeater::Start()
 
 	if (basedevice_ID){//master
 		//fprintf(stderr, "Repeater ID is : Master\r\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "Repeater ID is : Master \n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "Repeater ID is : Master \n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "Repeater ID is : Master \n");
 	}
 	else{//slave
 		//fprintf(stderr, "Repeater ID is : Slave\r\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "Repeater ID is : Slave \n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "Repeater ID is : Slave \n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "Repeater ID is : Slave \n");
 	}
 
 	/*****************************config repeater hw info****************************************/
@@ -161,8 +159,7 @@ void MyRepeater::Start()
 		syslog(LOG_LOCAL7 | LOG_ALERT, "id_playback thread is no exit.. \n");
 		exit(1);
 	}
-	syslog(LOG_LOCAL7 | LOG_INFO, "reboot the system \n");
-	syslog(LOG_LOCAL7 | LOG_DEBUG, "reboot the system \n");
+	syslog(LOG_LOCAL7 | LOG_NOTICE, "reboot the system \n");
 	//fprintf(stderr, "reboot the system\n");
 	sprintf(tmp, "reboot");//restart the device
 	system(tmp);
@@ -195,7 +192,7 @@ void MyRepeater::config_hw(uint32_t baseip, uint32_t mulcastip)
 		Configurable_delay_time = ((databuf[0] - 0x30) * 1000) + ((databuf[1] - 0x30) * 100) 
 			+ ((databuf[2] - 0x30)* 10) + (databuf[3] - 0x30);
 
-		if (Configurable_delay_time < 20)syslog(LOG_LOCAL7 | LOG_DEBUG, "delay_time err: The lowest configuration unit is 20ms \n");//fprintf(stderr, "delay_time err: The lowest configuration unit is 20ms\n");
+		if (Configurable_delay_time < 20);// syslog(LOG_LOCAL7 | LOG_DEBUG, "delay_time err: The lowest configuration unit is 20ms \n");//fprintf(stderr, "delay_time err: The lowest configuration unit is 20ms\n");
 		//printf("Set delay_time : %d ms\n", Configurable_delay_time);
 	}
 	else
@@ -322,7 +319,7 @@ void MyRepeater::ProcessRTPPacket(const RTPSourceData &srcdat, const RTPPacket &
 	current_ssrc = srcdat.GetSSRC();
 	length = rtppack.GetPayloadLength();
 
-	if (length != 20)syslog(LOG_LOCAL7 | LOG_DEBUG, "length: %d\n", length);//fprintf(stderr, "length: %d\n", length);
+	if (length != 20)syslog(LOG_LOCAL7 | LOG_NOTICE, "length: %d\n", length);//fprintf(stderr, "length: %d\n", length);
 	memcpy(buffer, rtppack.GetPayloadData(), length);
 
 	//m_PlayBackQueue.PushToQueue((char *)buffer, length);
@@ -332,8 +329,7 @@ void MyRepeater::ProcessRTPPacket(const RTPSourceData &srcdat, const RTPPacket &
 		counter = 0;
 		s_counter++;
 		//fprintf(stderr, " RTP-recv 139p from SSRC:0x%x, tip:%d\n", current_ssrc, s_counter);
-		syslog(LOG_LOCAL7 | LOG_INFO, " RTP-recv 139p from SSRC:0x%x, tip:%d\n", current_ssrc, s_counter);
-		syslog(LOG_LOCAL7 | LOG_DEBUG, " RTP-recv 139p from SSRC:0x%x, tip:%d\n", current_ssrc, s_counter);
+		syslog(LOG_LOCAL7 | LOG_NOTICE, " RTP-recv 139p from SSRC:0x%x, tip:%d\n", current_ssrc, s_counter);
 	}
 
 }
@@ -439,8 +435,7 @@ void MyRepeater::MasterOnDataFunc(int command, ResponeData data)
 	{
 	case SLAVEMAP:
 		//fprintf(stderr, "RepeaterRecvmap\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "RepeaterRecvmap\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "RepeaterRecvmap\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "RepeaterRecvmap\n");
 		//fprintf(stderr, "write map into file...\n");
 
 		my_baseinfo->p_file->SaveMap(data.slavemap);
@@ -468,19 +463,15 @@ void MyRepeater::MasterOnDataFunc(int command, ResponeData data)
 		case WAIT_SLAVE_GET_CHANNEL:
 
 			//fprintf(stderr, "RepeaterRecvGetChannelStatus\n");
-			syslog(LOG_LOCAL7 | LOG_INFO, "RepeaterRecvGetChannelStatus\n");
-			syslog(LOG_LOCAL7 | LOG_DEBUG, "RepeaterRecvGetChannelStatus\n");
-
+			syslog(LOG_LOCAL7 | LOG_NOTICE, "RepeaterRecvGetChannelStatus\n");
 			pthread_mutex_lock(&flag_mutex);//lock-flag
 
 			proto->ReplyChannelStatus(channel_busy_flag, data.getChannelIp.c_str());//Tell slave current channel status
 			if (channel_busy_flag){
 				//fprintf(stderr, "Slave:%s apply for channel\n", data.getChannelIp.c_str());
 				//fprintf(stderr, "Sorry, The current channel is busy...\n");
-				syslog(LOG_LOCAL7  | LOG_INFO, "Slave:%s apply for channel\n", data.getChannelIp.c_str());
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "Sorry, The current channel is busy...\n");
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "Slave:%s apply for channel\n", data.getChannelIp.c_str());
-				syslog(LOG_LOCAL7 | LOG_INFO, "Sorry, The current channel is busy...\n");
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "Slave:%s apply for channel\n", data.getChannelIp.c_str());
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "Sorry, The current channel is busy...\n");
 				status = WAIT_SLAVE_GET_CHANNEL;
 			}
 			else{
@@ -488,8 +479,7 @@ void MyRepeater::MasterOnDataFunc(int command, ResponeData data)
 				//my_alsa->do_pause(RESUME);//RESUME Record and Playback
 				usleep(5000);//5ms
 				//fprintf(stderr, "Slave:%s will send RTP data..\n", data.getChannelIp.c_str());
-				syslog(LOG_LOCAL7 | LOG_INFO, "Slave:%s will send RTP data..\n", data.getChannelIp.c_str());
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "Slave:%s will send RTP data..\n", data.getChannelIp.c_str());
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "Slave:%s will send RTP data..\n", data.getChannelIp.c_str());
 				proto->BeginRecordVoice();//Notify all machines to receive RTP data
 
 				Set_RTPRecv_Event();
@@ -529,10 +519,8 @@ void MyRepeater::MasterOnDataFunc(int command, ResponeData data)
 			}
 			//fprintf(stderr, "RepeaterRecvReleaseChannel\n");
 		//	fprintf(stderr, "Slave:%s has end RTP data..\n", data.releaseChannelIp.c_str());
-			syslog(LOG_LOCAL7  | LOG_INFO, "RepeaterRecvReleaseChannel\n");
-			syslog(LOG_LOCAL7 | LOG_DEBUG , "RepeaterRecvReleaseChannel\n");
-			syslog(LOG_LOCAL7  | LOG_INFO, "Slave:%s has end RTP data..\n", data.releaseChannelIp.c_str());
-			syslog(LOG_LOCAL7 | LOG_DEBUG, "Slave:%s has end RTP data..\n", data.releaseChannelIp.c_str());
+			syslog(LOG_LOCAL7 | LOG_NOTICE, "RepeaterRecvReleaseChannel\n");
+			syslog(LOG_LOCAL7 | LOG_NOTICE, "Slave:%s has end RTP data..\n", data.releaseChannelIp.c_str());
 
 			pthread_mutex_lock(&flag_mutex);//lock-flag
 			proto->EndRecorderVoice();//Notify all slave, slave voice data ends
@@ -584,8 +572,7 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 	{
 	case SLAVEMAP:
 		//fprintf(stderr, "RepeaterRecvmap\n");
-		syslog(LOG_LOCAL7  | LOG_INFO, "RepeaterRecvmap\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG , "RepeaterRecvmap\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "RepeaterRecvmap\n");
 		//fprintf(stderr, "write map into file...\n");
 
 		my_baseinfo->p_file->SaveMap(data.slavemap);
@@ -597,8 +584,7 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 		//pthread_mutex_unlock(&map_mutex);//unlock-flag
 
 		//fprintf(stderr, "save map-file is finished\n");		
-		syslog(LOG_LOCAL7  | LOG_INFO, "save map-file is finished\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG , "save map-file is finished\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "save map-file is finished\n");
 
 		break;
 	case LOCALSETCHANNELSTATUS:
@@ -611,10 +597,8 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 		if (data.status){//busy
 			//fprintf(stderr, "channel is busy...\n");
 			//fprintf(stderr, "ignore local audio data...\n");
-			syslog(LOG_LOCAL7 | LOG_INFO, "channel is busy...\n");
-			syslog(LOG_LOCAL7 | LOG_DEBUG , "channel is busy...\n");
-			syslog(LOG_LOCAL7  | LOG_INFO, "ignore local audio data...\n");
-			syslog(LOG_LOCAL7 | LOG_DEBUG, "ignore local audio data...\n");
+			syslog(LOG_LOCAL7 | LOG_NOTICE, "channel is busy...\n");
+			syslog(LOG_LOCAL7 | LOG_NOTICE, "ignore local audio data...\n");
 
 		}
 		else{//free
@@ -626,13 +610,11 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 				if (my_gpio_app->get_cd_current_value() == HIGH_LEVEL)break;//cd has released
 				if (Mulcast_Trigger == 1){
 					//fprintf(stderr, "Slave RTP is Recv...\n");
-					syslog(LOG_LOCAL7 | LOG_INFO, "Slave RTP is Recv...\n");
-					syslog(LOG_LOCAL7 | LOG_DEBUG, "Slave RTP is Recv...\n");
+					syslog(LOG_LOCAL7 | LOG_NOTICE, "Slave RTP is Recv...\n");
 					break;
 				}//salve处于正在接收状态，CD触发，主机无响应，本地转发响应，则应该忽略
 				//fprintf(stderr, "Master is not work!!!...\n");
-				syslog(LOG_LOCAL7 | LOG_INFO, "Master is not work!!!...\n");
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "Master is not work!!!...\n");
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "Master is not work!!!...\n");
 				stop_send_rtp_flag = 1;
 				slave_busy = 1;
 			}
@@ -661,8 +643,7 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 		if (slave_busy)break;
 
 		//fprintf(stderr, "Remote Voice begin\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "Remote Voice begin\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "Remote Voice begin\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "Remote Voice begin\n");
 
 		pthread_mutex_lock(&flag_mutex);//lock-flag
 
@@ -675,9 +656,7 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 		pthread_mutex_unlock(&flag_mutex);//unlock-flag
 
 		//fprintf(stderr, "Some one will send RTP data..\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "Some one will send RTP data..\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "Some one will send RTP data..\n");
-
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "Some one will send RTP data..\n");
 
 		break;
 
@@ -692,8 +671,7 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 		if (!playback_start_flag)break;
 
 		//fprintf(stderr, "Remote Voice end\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "Remote Voice end\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "Remote Voice end\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "Remote Voice end\n");
 
 		pthread_mutex_lock(&flag_mutex);//lock-flag
 
@@ -931,8 +909,7 @@ void MyRepeater::CDPollThreadFunc()
 				if (temp == HIGH_LEVEL){
 					if (0 == CD_Trigger)continue;
 					//fprintf(stderr, "!!!CD_release...\n");
-					syslog(LOG_LOCAL7 | LOG_INFO, "!!!CD_release...\n");
-					syslog(LOG_LOCAL7 | LOG_DEBUG, "!!!CD_release...\n");
+					syslog(LOG_LOCAL7 | LOG_NOTICE, "!!!CD_release...\n");
 
 					pthread_mutex_lock(&flag_mutex);//lock-flag
 					if (basedevice_ID == true){
@@ -967,8 +944,7 @@ void MyRepeater::CDPollThreadFunc()
 						//Check channel status
 						if (channel_busy_flag == 0){
 							//fprintf(stderr, "!!!Master CD_Trigger...\n");
-							syslog(LOG_LOCAL7 | LOG_INFO, "!!!CD_release...\n");
-							syslog(LOG_LOCAL7 | LOG_DEBUG, "!!!CD_release...\n");
+							syslog(LOG_LOCAL7 | LOG_NOTICE, "!!!CD_release...\n");
 
 							gettimeofday(&start, NULL);
 
@@ -987,10 +963,8 @@ void MyRepeater::CDPollThreadFunc()
 							//Ignore interrupt
 							//fprintf(stderr, "channel is busy...\n");
 							//fprintf(stderr, "rtp-recv is running...\n");
-							syslog(LOG_LOCAL7  | LOG_INFO, "channel is busy...\n");
-							syslog(LOG_LOCAL7  | LOG_INFO, "channel is busy...\n");
-							syslog(LOG_LOCAL7 | LOG_DEBUG, "rtp-recv is running...\n");
-							syslog(LOG_LOCAL7 | LOG_DEBUG, "rtp-recv is running...\n");
+							syslog(LOG_LOCAL7 | LOG_NOTICE, "channel is busy...\n");
+							syslog(LOG_LOCAL7 | LOG_NOTICE, "rtp-recv is running...\n");
 						}
 						pthread_mutex_unlock(&flag_mutex);//unlock-flag
 					}
@@ -998,8 +972,7 @@ void MyRepeater::CDPollThreadFunc()
 					{
 						if (playback_start_flag)continue;
 						//fprintf(stderr, "!!!Slave CD_Trigger...\n");
-						syslog(LOG_LOCAL7 | LOG_INFO, "!!!Slave CD_Trigger...\n");
-						syslog(LOG_LOCAL7 | LOG_DEBUG, "!!!Slave CD_Trigger...\n");
+						syslog(LOG_LOCAL7 | LOG_NOTICE, "!!!Slave CD_Trigger...\n");
 						proto->GetStatus();
 						usleep(10000);//sleep 10ms
 					}
@@ -1180,8 +1153,8 @@ void MyRepeater::PlaybackThreadFunc()
 					play_counter = 0;
 					s_counter++;
 					//fprintf(stderr, " local-playback 139p, tip:%d\n", s_counter);
-					syslog(LOG_LOCAL7 | LOG_INFO, " local-playback 139p, tip:%d\n", s_counter);
-					syslog(LOG_LOCAL7 | LOG_DEBUG, " local-playback 139p, tip:%d\n", s_counter);
+					syslog(LOG_LOCAL7 | LOG_NOTICE, " local-playback 139p, tip:%d\n", s_counter);
+
 				}
 				//usleep(1500);//1.5ms
 			}
@@ -1194,8 +1167,7 @@ void MyRepeater::PlaybackThreadFunc()
 			else{
 
 				//fprintf(stderr, "m_PlayBackQueue.TakeFromQueue err : %d\n", temp);//nerver happened
-				syslog(LOG_LOCAL7 | LOG_INFO, "m_PlayBackQueue.TakeFromQueue err : %d\n", temp);
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "m_PlayBackQueue.TakeFromQueue err : %d\n", temp);
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "m_PlayBackQueue.TakeFromQueue err : %d\n", temp);
 				break;
 			}
 			//fprintf(stderr, "play_run\n");
@@ -1350,14 +1322,12 @@ void MyRepeater::MulcastPortPollThreadFunc()
 			if (audio_codec_err_counter > 30){
 				pthread_cancel(id_playback);
 				//fprintf(stderr, "Sound card failure, ready to restart the gateway\n");
-				syslog(LOG_LOCAL7 | LOG_INFO, "Sound card failure, ready to restart the gateway\n");
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "Sound card failure, ready to restart the gateway\n");
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "Sound card failure, ready to restart the gateway\n");
 			}
 			if ((end.tv_sec - start.tv_sec) > 60){
 
 				//fprintf(stderr, "remote rtp timeout!!!\r\n");
-				syslog(LOG_LOCAL7 | LOG_INFO, "remote rtp timeout!!!\r\n");
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "remote rtp timeout!!!\r\n");
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "remote rtp timeout!!!\r\n");
 				timeout_flag = 1;
 				pthread_mutex_lock(&flag_mutex);//lock-flag
 
@@ -1439,8 +1409,7 @@ void MyRepeater::TimePollThreadFunc()
 
 			pthread_cancel(id_playback);
 			//fprintf(stderr, "Sound card failure, ready to restart the gateway\n");
-			syslog(LOG_LOCAL7 | LOG_INFO, "Sound card failure, ready to restart the gateway\n");
-			syslog(LOG_LOCAL7 | LOG_DEBUG, "Sound card failure, ready to restart the gateway\n");
+			syslog(LOG_LOCAL7 | LOG_NOTICE, "Sound card failure, ready to restart the gateway\n");
 
 		}
 
@@ -1448,17 +1417,14 @@ void MyRepeater::TimePollThreadFunc()
 
 			if (cd_level == LOW_LEVEL){
 				//fprintf(stderr, "end_time:%ld , %ld ", end.tv_sec, end.tv_usec);
-				syslog(LOG_LOCAL7 | LOG_INFO, "end_time:%ld , %ld ", end.tv_sec, end.tv_usec);
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "end_time:%ld , %ld ", end.tv_sec, end.tv_usec);
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "end_time:%ld , %ld ", end.tv_sec, end.tv_usec);
 				timeout_flag = 1;
 			}
 			else
 			{	
 				if (CD_Trigger == 0)continue;
 				//fprintf(stderr, "!!!NOTE:user has released the CD\n ");
-				syslog(LOG_LOCAL7 | LOG_INFO, "!!!NOTE:user has released the CD\n ");
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "!!!NOTE:user has released the CD\n ");
-
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "!!!NOTE:user has released the CD\n ");
 
 			}
 
@@ -1500,8 +1466,7 @@ void MyRepeater::rtp_session_create(std::map<std::string, std::string> slavemap)
 
 	size = slavemap.size();
 	//fprintf(stderr,"slavemap.size() :%d\n", size);
-	syslog(LOG_LOCAL7 | LOG_INFO, "slavemap.size() :%d\n", size);
-	syslog(LOG_LOCAL7 | LOG_DEBUG, "slavemap.size() :%d\n", size);
+	syslog(LOG_LOCAL7 | LOG_NOTICE, "slavemap.size() :%d\n", size);
 
 	pthread_mutex_lock(&map_mutex);//lock-flag
 
@@ -1515,8 +1480,7 @@ void MyRepeater::rtp_session_create(std::map<std::string, std::string> slavemap)
 		{
 			/*find success*/
 			//fprintf(stderr,"IPaddress is have\n");
-			syslog(LOG_LOCAL7 | LOG_INFO, "IPaddress is have\n");
-			syslog(LOG_LOCAL7 | LOG_DEBUG, "IPaddress is have\n");
+			syslog(LOG_LOCAL7 | LOG_NOTICE, "IPaddress is have\n");
 			continue;
 		}
 		else
@@ -1532,8 +1496,7 @@ void MyRepeater::rtp_session_create(std::map<std::string, std::string> slavemap)
 
 				sessionmap[key] = pRtp;
 				//fprintf(stderr,"new session create okay!!!\n");
-				syslog(LOG_LOCAL7 | LOG_INFO, "new session create okay!!!\n");
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "new session create okay!!!\n");
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "new session create okay!!!\n");
 				base_port = base_port + 20;
 			}
 			
@@ -1548,8 +1511,7 @@ void MyRepeater::rtp_session_create(std::map<std::string, std::string> slavemap)
 		{
 			/*find success*/
 			//fprintf(stderr,"Master IPaddress is have\n");
-			syslog(LOG_LOCAL7 | LOG_INFO, "Master IPaddress is have\n");
-			syslog(LOG_LOCAL7 | LOG_DEBUG, "Master IPaddress is have\n");
+			syslog(LOG_LOCAL7 | LOG_NOTICE, "Master IPaddress is have\n");
 		
 		}
 		else
@@ -1558,8 +1520,7 @@ void MyRepeater::rtp_session_create(std::map<std::string, std::string> slavemap)
 			pRtp->init(4000, masterip_str, baseip_str);
 			sessionmap[masterip_str] = pRtp;
 			//fprintf(stderr,"Slave connect master session create okay!!!\n");
-			syslog(LOG_LOCAL7 | LOG_INFO, "Slave connect master session create okay!!!\n");
-			syslog(LOG_LOCAL7 | LOG_DEBUG, "Slave connect master session create okay!!!\n");
+			syslog(LOG_LOCAL7 | LOG_NOTICE, "Slave connect master session create okay!!!\n");
 		}
 	
 	}
@@ -1583,8 +1544,7 @@ void MyRepeater::rtp_session_create(std::map<std::string, std::string> slavemap)
 				itSession->second = NULL;
 				sessionmap.erase(session_key);
 				//fprintf(stderr, "%s has dropped...\r\n", session_key.c_str());
-				syslog(LOG_LOCAL7 | LOG_INFO, "%s has dropped...\r\n", session_key.c_str());
-				syslog(LOG_LOCAL7 | LOG_DEBUG, "%s has dropped...\r\n", session_key.c_str());
+				syslog(LOG_LOCAL7 | LOG_NOTICE, "%s has dropped...\r\n", session_key.c_str());
 
 			}
 
@@ -1619,14 +1579,12 @@ void MyRepeater::Wait_Record_Event()
 	pthread_mutex_lock(&CD_cond_mutex);
 	while (CD_Trigger == 0){
 		//fprintf(stderr, "record  is ready\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "record  is ready\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "record  is ready\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "record  is ready\n");
 		stop_send_rtp_flag = 0;
 		my_alsa->record_prepare();
 		pthread_cond_wait(&CD_trigger_cond, &CD_cond_mutex);
 		//fprintf(stderr, "record  is running\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "record  is running\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "record  is running\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "record  is running\n");
 		my_alsa->record_start();
 	}
 	pthread_mutex_unlock(&CD_cond_mutex);
@@ -1639,12 +1597,10 @@ void MyRepeater::Wait_TimePoll_Event()
 	pthread_mutex_lock(&CD_cond_mutex);
 	while (CD_Trigger == 0){
 		//fprintf(stderr, "Timekeeper   is ready\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "Timekeeper   is ready\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "Timekeeper   is ready\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "Timekeeper   is ready\n");
 		pthread_cond_wait(&CD_trigger_cond, &CD_cond_mutex);
 		//fprintf(stderr, "Timekeeper   is running\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "Timekeeper   is running\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "Timekeeper   is running\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "Timekeeper   is running\n");
 	}
 	pthread_mutex_unlock(&CD_cond_mutex);
 
@@ -1671,13 +1627,11 @@ void MyRepeater::Wait_Playback_Event()
 	pthread_mutex_lock(&playback_start_flag_mutex);
 	while (playback_start_flag == 0){
 		//fprintf(stderr, "playback  is ready\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "playback  is ready\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "playback  is ready\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "playback  is ready\n");
 		my_alsa->play_prepare();
 		pthread_cond_wait(&playback_cond, &playback_start_flag_mutex);
 		//fprintf(stderr, "playback  is running\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "playback  is running\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "playback  is running\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "playback  is running\n");
 		my_alsa->play_start();
 	}
 	pthread_mutex_unlock(&playback_start_flag_mutex);
@@ -1706,12 +1660,10 @@ void MyRepeater::Wait_RTPRecv_Event()
 	pthread_mutex_lock(&poll_cond_mutex);
 	while (Mulcast_Trigger == 0){
 		//fprintf(stderr, "mulcastport poll  is ready\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "mulcastport poll  is ready\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "mulcastport poll  is ready\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "mulcastport poll  is ready\n");
 		pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
 		//fprintf(stderr, "mulcastport poll  is running\n");
-		syslog(LOG_LOCAL7 | LOG_INFO, "mulcastport poll  is running\n");
-		syslog(LOG_LOCAL7 | LOG_DEBUG, "mulcastport poll  is running\n");
+		syslog(LOG_LOCAL7 | LOG_NOTICE, "mulcastport poll  is running\n");
 		gettimeofday(&start, NULL);
 	}
 	pthread_mutex_unlock(&poll_cond_mutex);

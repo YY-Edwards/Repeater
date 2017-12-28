@@ -75,7 +75,7 @@ GPIO_App::~GPIO_App()
 void GPIO_App::config_GPIO(uint8_t port)
 {
 	//fprintf(stderr,"config GPIO...\n");
-	syslog(LOG_LOCAL7 | LOG_DEBUG, "config GPIO...\n");
+	//syslog(LOG_LOCAL7 | LOG_DEBUG, "config GPIO...\n");
 	if (gpio_config_flag == 0)
 		gpio_config_flag = 1;
 

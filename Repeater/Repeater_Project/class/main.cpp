@@ -10,7 +10,7 @@ MyRepeater *my_repeater = new MyRepeater;
 void signal_handler(int signo)
 {
 	//fprintf(stderr, "\nHave caught sig N.O. %d\n", signo);
-	syslog(LOG_LOCAL7 | LOG_INFO, "\nHave caught sig N.O. %d\n", signo);
+	syslog(LOG_LOCAL7 | LOG_NOTICE, "\nHave caught sig N.O. %d\n", signo);
 	syslog(LOG_LOCAL7 | LOG_DEBUG, "\nHave caught sig N.O. %d\n", signo);
 
 	signal(signo, SIG_DFL);
@@ -30,9 +30,6 @@ int main(void)
 
 	syslog(LOG_LOCAL7 | LOG_DEBUG, "APP_Version:1.5.0.1 \n");
 	syslog(LOG_LOCAL7 | LOG_DEBUG, "Repeater main() is running \n");
-	syslog(LOG_NOTICE, "yoyo-info\n");
-	syslog(LOG_DEBUG, "yoyo-debug\n");
-	syslog(LOG_NOTICE | LOG_DEBUG, "yoyo-debug+info\n");
 	//The 4-byte APP Firmware Version number uses a Major Number to track the major changes,
 	// Minor Number to track minor changes and Product ID Number to differentiate the product line.
 	/*Product ID Number:
