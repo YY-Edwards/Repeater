@@ -56,6 +56,9 @@ private:
 	std::string getStatusIp;
 	bool isAlive;
 	
+
+	pthread_t id;
+	pthread_t aliveId;
 	
 };
 

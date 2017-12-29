@@ -17,7 +17,7 @@ AudioQueue::AudioQueue()
 	}
 	fifo_counter = 0;
 
-	fprintf(stderr,"init queue mutex, sem...\n");
+	//fprintf(stderr,"init queue mutex, sem...\n");
 	
 }
 AudioQueue::~AudioQueue()

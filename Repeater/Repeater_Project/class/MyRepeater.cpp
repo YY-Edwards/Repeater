@@ -20,8 +20,19 @@ MyRepeater::MyRepeater()
 , rtp_can_send(0)
 
 {
-
+	fprintf(stderr, "\n/***********************V2.1.0.1******************************/\n");
+	fprintf(stderr, "\n/****************Repeater main() is running*******************/\n");
 	pThis = this;
+	//The 4-byte APP Firmware Version number uses a Major Number to track the major changes,
+	// Minor Number to track minor changes and Product ID Number to differentiate the product line.
+	/*Product ID Number:
+	0x0001   DRS
+	0x0002
+	0x0003	...
+	...		...
+
+	*/
+
 	my_baseinfo = new Monitor_Interface;
 	my_gpio_app = new GPIO_App;
 	my_alsa = new AudioAlsa;
@@ -54,6 +65,21 @@ MyRepeater::MyRepeater()
 
 MyRepeater::~MyRepeater()
 {
+	
+	pthread_cancel(id_CDpoll);
+	pthread_cancel(id_rtppoll);
+	pthread_cancel(id_rtpsend);
+	pthread_cancel(id_encode);
+	pthread_cancel(id_decode);
+	pthread_cancel(id_record);
+	pthread_cancel(id_playback);
+	pthread_cancel(id_time);
+
+
+	//fprintf(stderr, "pthread_cancel(id_CDpoll) \n");
+	//sleep(10);
+	//fprintf(stderr, "sleep 10s \n");
+
 	map<string, Myrtp*>::iterator it;
 	while (sessionmap.size() > 0)
 	{
@@ -74,7 +100,7 @@ MyRepeater::~MyRepeater()
 
 	if (my_baseinfo != NULL)delete my_baseinfo;
 	if (my_gpio_app != NULL)delete my_gpio_app;
-	if (my_alsa != NULL)delete my_alsa;;
+	if (my_alsa != NULL)delete my_alsa;
 	if (proto != NULL)delete proto;
 	if (my_recvrtp != NULL)delete my_recvrtp;
 	if (my_speex != NULL)delete my_speex;
@@ -345,10 +371,15 @@ void MyRepeater::DecodeThreadFunc()
 	short decode_buff[160];
 	char encode_buff[100];
 	pthread_detach(pthread_self());
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
 	fprintf(stderr, "DecodeThread is running...\n");
 	while (1)
 	{
+		pthread_testcancel();
 		temp = m_DecodeQueue.TakeFromQueueForSpeex((char *)encode_buff, nbyte);
+		pthread_testcancel();
 		if (temp == 0){
 
 			if (Mulcast_Trigger == 0){
@@ -828,12 +859,18 @@ void MyRepeater::CDPollThreadFunc()
 
 	bzero(buf, 10);
 	pthread_detach(pthread_self());
+
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
 	fprintf(stderr, "CD poll thread is running...\n");
 
 	while (1)
 	{
 
+		pthread_testcancel();
 		rc = poll(fdset, nfds, POLL_TIMEOUT);
+		pthread_testcancel();
 		if (rc < 0){
 			fprintf(stderr, "poll() failed!\n");
 			break;
@@ -970,6 +1007,8 @@ void MyRepeater::RecordThreadFunc()
 	bzero(capture_buffer, size);
 
 	pthread_detach(pthread_self());
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 
 	//pthread_cleanup_push(pthread_mutex_unlock, (void*)&CD_cond_mutex);
 	while (1){
@@ -980,7 +1019,9 @@ void MyRepeater::RecordThreadFunc()
 
 		my_alsa->get_record_buf(capture_buffer);
 
+		pthread_testcancel();
 		temp = m_PlayBackQueue.PushToQueue((char *)capture_buffer, size);
+		pthread_testcancel();
 
 		if (stop_send_rtp_flag == 0){
 
@@ -1024,10 +1065,14 @@ void MyRepeater::EncodeThreadFunc()
 	short buff[160];
 	char encode_buff[100];
 	//pthread_detach(pthread_self());
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 	fprintf(stderr, "EncodeThread is running...\n");
 	while (1)
 	{
+		pthread_testcancel();
 		temp = m_EncodeQueue.TakeFromQueue(buff, size);
+		pthread_testcancel();
 		if (temp == 0){
 
 			//gettimeofday(&enc_start, NULL);
@@ -1078,14 +1123,17 @@ void MyRepeater::PlaybackThreadFunc()
 	}
 	bzero(playback_buffer, size);
 
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 	//pthread_detach(pthread_self());
 	//fprintf(stderr, "playback pthead is running...\n");
 
 	for (;;){
 
 			Wait_Playback_Event();
-
+			pthread_testcancel();
 			temp = m_PlayBackQueue.TakeFromQueue((char *)playback_buffer, length);
+			pthread_testcancel();
 			if (temp == 0){
 				err = my_alsa->send_buf_playback(playback_buffer);;
 				if (err == -EPIPE){
@@ -1157,6 +1205,8 @@ void MyRepeater::RTPsendThreadFunc()
 	bzero(package_send_buffer, 20);
 
 	pthread_detach(pthread_self());
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 	fprintf(stderr, "Rtp send pthread is running...\n");
 
 	while (1){
@@ -1174,7 +1224,9 @@ void MyRepeater::RTPsendThreadFunc()
 		}*/
 		//fprintf(stderr, "rtp-send_run\n");
 		//temp = m_RtpSendQueue.TakeFromQueue((char *)package_send_buffer, length);// 非阻塞模式
+		pthread_testcancel();
 		temp = m_RtpSendQueue.TakeFromQueueForSpeex((char *)package_send_buffer, length);// 非阻塞模式
+		pthread_testcancel();
 		if (temp == 0){
 
 			if ((my_gpio_app->get_cd_current_value() == 1) || (CD_Trigger == 0)){
@@ -1249,6 +1301,8 @@ void MyRepeater::MulcastPortPollThreadFunc()
 	int recv_counter = 0;*/
 
 	pthread_detach(pthread_self());
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 
 	//pthread_cleanup_push(pthread_mutex_unlock, (void *)&mulcast_poll_cond);
 	while (1){
@@ -1304,7 +1358,9 @@ void MyRepeater::MulcastPortPollThreadFunc()
 			my_recvrtp->EndDataAccess();
 			status = my_recvrtp->Poll();
 			checkerror(status);
+			pthread_testcancel();
 			usleep(1000);//1ms
+			pthread_testcancel();
 
 	}
 
@@ -1331,13 +1387,18 @@ void MyRepeater::TimePollThreadFunc()
 	bzero(tmp, 50);
 
 	int cd_level = HIGH_LEVEL;//default HIGH
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
 	while (1)
 	{
 		Wait_TimePoll_Event();
 
 		gettimeofday(&end, NULL);
 		cd_level = my_gpio_app->get_cd_current_value();//get CD_pin
+		pthread_testcancel();
 		usleep(20000);//20ms
+		pthread_testcancel();
 		
 		if (audio_codec_err_counter > 30){
 

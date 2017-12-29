@@ -21,11 +21,6 @@ void signal_handler(int signo)
 
 int main(void)
 {
-
-	fprintf(stderr,"\n/***********************V1.0.4.3******************************/\n");
-
-	fprintf(stderr,"\n/****************Repeater main() is running*******************/\n");
-
 	signal(SIGINT, signal_handler);
 	signal(SIGTERM, signal_handler);
 	signal(SIGABRT, signal_handler);

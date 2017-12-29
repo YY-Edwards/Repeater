@@ -58,6 +58,10 @@ private:
 	sem_t sem;
 	bool isGetStatus;
 
+	pthread_t id;
+	pthread_t aliveId;
+	pthread_t monitorId;
+
 };
 
 

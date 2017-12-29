@@ -27,6 +27,11 @@ CMaster::~CMaster()
 	pthread_mutex_destroy(&m_onDataLocker);
 	pthread_mutex_destroy(&m_sendLocker);
 	pthread_mutex_destroy(&m_aliveLocker);
+
+	pthread_cancel(id);
+	pthread_cancel(aliveId);
+
+
 	fprintf(stderr, "delete class CMaster\n");
 
 }
@@ -79,7 +84,7 @@ bool CMaster::CloseSocket(int sockfd)
 }
 void CMaster::CreateRecvThread()
 {
-	pthread_t id, aliveId;
+	//pthread_t id, aliveId;
 	int  ret = pthread_create(&id, NULL, RecvThread, this);
 	int   aliveRet = pthread_create(&aliveId, NULL, MonitorAliveThread, this);
 	//CreateThread(NULL, 0, RecvThread, this, THREAD_PRIORITY_NORMAL, NULL);
@@ -121,12 +126,18 @@ void*  /*DWORD WINAPI*/ CMaster::MonitorAliveThread(void */*LPVOID*/ p)
 }
 void CMaster::MonitorAliveThreadFunc()
 {
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
 	while (isRecvStatus)
 	{
 		pthread_mutex_lock(&m_aliveLocker);
 		isAlive = false;
 		pthread_mutex_unlock(&m_aliveLocker);
+
+		pthread_testcancel();
 		sleep(60);
+		pthread_testcancel();
 
 		pthread_mutex_lock(&m_aliveLocker);
 		if (!isAlive)
@@ -141,16 +152,22 @@ void CMaster::MonitorAliveThreadFunc()
 			pthread_mutex_unlock(&m_mapLocker);
 		}
 		pthread_mutex_unlock(&m_aliveLocker);
+
 	}
 }
 void CMaster::RecvThreadFunc()
 {
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
 	while (isRecvStatus)
 	{
 		//int  len = sizeof(struct sockaddr_in);
 		socklen_t  len = sizeof(struct sockaddr_in);
 		memset(recvBuf,0,BUFLENGTH);
+		pthread_testcancel();
 		int ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
+		pthread_testcancel();
 		if (-1 != ret)
 		{
 		

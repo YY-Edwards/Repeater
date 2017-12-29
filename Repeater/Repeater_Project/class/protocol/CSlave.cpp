@@ -30,6 +30,10 @@ CSlave::~CSlave()
 	pthread_mutex_destroy(&m_mapLocker);
 
 	sem_destroy(&sem);
+	pthread_cancel(id);
+	pthread_cancel(aliveId);
+	pthread_cancel(monitorId);
+
 	fprintf(stderr, "delete class CSlave\n");
 }
 bool CSlave::Connect(const char* masterIp, const char* slaveIp)
@@ -114,7 +118,7 @@ bool CSlave::CloseSocket(int sockfd)
 void CSlave::CreateRecvThread()
 {
 	//fprintf(stderr,"createThread\n");
-	pthread_t id ,aliveId,monitorId;
+	/*pthread_t id ,aliveId,monitorId;*/
 	int  ret,aliveRet, monitorRet;
 	ret = pthread_create(&id, NULL, RecvThread, this);
 	aliveRet = pthread_create(&aliveId, NULL, SendAliveThread, this);
@@ -177,12 +181,17 @@ void CSlave::RecvThreadFunc()
 {
 	int temp = 0; 
 
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
 	while (isRecvStatus)
 	{
 		socklen_t  len = sizeof(struct sockaddr_in);
 		//int  len = sizeof(struct sockaddr_in);
 		bzero(recvBuf, sizeof(recvBuf));
+		pthread_testcancel();
 		int ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
+		pthread_testcancel();
 		time_t t = time(0);
 
 		if (-1 != ret)
@@ -253,6 +262,9 @@ void CSlave::RecvThreadFunc()
 }
 void CSlave::SendAliveThreadFunc()
 {
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
 	while (isRecvStatus)
 	{
 		if (!isRecvedmap)
@@ -263,8 +275,9 @@ void CSlave::SendAliveThreadFunc()
 		{
 			SendAlive2Master();
 		}
-		
+		pthread_testcancel();
 		sleep(20);/*20s更新一次心跳*/
+		pthread_testcancel();
 	}
 }
 //void CSlave::MonitorStatusThreadFunc()
@@ -335,12 +348,17 @@ void CSlave::SendAliveThreadFunc()
 void CSlave::MonitorStatusThreadFunc()
 {
 	
+	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
 	while (isRecvStatus)
 	{
 		//fprintf(stderr,"sem_wait\n");
 		sem_wait(&sem);
 		//usleep(30000);//30ms
+		pthread_testcancel();
 		usleep(400000);//400ms
+		pthread_testcancel();
 		//sleep(1);
 		//fprintf(stderr,"sleep \n");
 		//delay(250);   //延时1s
