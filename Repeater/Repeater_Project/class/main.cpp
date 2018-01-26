@@ -27,6 +27,11 @@ int main(void)
 
 	my_repeater->Start();
 
+	while (1)
+	{
+		sleep(1);
+	}
+
 	delete my_repeater;
 
 	return 0;

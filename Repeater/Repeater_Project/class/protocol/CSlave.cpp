@@ -23,6 +23,11 @@ CSlave::CSlave()
 CSlave::~CSlave()
 {
 
+	SetThreadExitFlag();
+	pthread_join(id, NULL);
+	pthread_join(aliveId, NULL);
+	pthread_join(monitorId, NULL);
+
 	pthread_mutex_destroy(&lastRecvAliveTimeLocker);
 	pthread_mutex_destroy(&m_onDataLocker);
 	pthread_mutex_destroy(&m_statusLocker);
@@ -30,9 +35,9 @@ CSlave::~CSlave()
 	pthread_mutex_destroy(&m_mapLocker);
 
 	sem_destroy(&sem);
-	pthread_cancel(id);
-	pthread_cancel(aliveId);
-	pthread_cancel(monitorId);
+	//pthread_cancel(id);
+	//pthread_cancel(aliveId);
+	//pthread_cancel(monitorId);
 
 	fprintf(stderr, "delete class CSlave\n");
 }
@@ -181,17 +186,22 @@ void CSlave::RecvThreadFunc()
 {
 	int temp = 0; 
 
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+	struct timeval timeout;
+	socklen_t  len = sizeof(struct sockaddr_in);
+	timeout.tv_sec = 10 * 1000 / 1000;
+	timeout.tv_usec = (10 * 1000 % 1000) * 1000;
+	int ret = ret | (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == 0 ? 0 : 0x2);
 
 	while (isRecvStatus)
 	{
-		socklen_t  len = sizeof(struct sockaddr_in);
 		//int  len = sizeof(struct sockaddr_in);
 		bzero(recvBuf, sizeof(recvBuf));
-		pthread_testcancel();
-		int ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
-		pthread_testcancel();
+		if (set_thread_exit_flag)break;
+		//pthread_testcancel();
+		ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
+		//pthread_testcancel();
 		time_t t = time(0);
 
 		if (-1 != ret)
@@ -259,14 +269,19 @@ void CSlave::RecvThreadFunc()
 		}
 		usleep(5000);
 	}
+
+	fprintf(stderr, "exit RecvThreadFunc\n");
+	pthread_exit(NULL);
+
 }
 void CSlave::SendAliveThreadFunc()
 {
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 
 	while (isRecvStatus)
 	{
+		if (set_thread_exit_flag)break;
 		if (!isRecvedmap)
 		{
 			SendRegister2Master();
@@ -275,10 +290,14 @@ void CSlave::SendAliveThreadFunc()
 		{
 			SendAlive2Master();
 		}
-		pthread_testcancel();
+		//pthread_testcancel();
 		sleep(20);/*20s更新一次心跳*/
-		pthread_testcancel();
+		//pthread_testcancel();
 	}
+
+	fprintf(stderr, "exit SendAliveThreadFunc\n");
+	pthread_exit(NULL);
+	
 }
 //void CSlave::MonitorStatusThreadFunc()
 //{
@@ -348,30 +367,65 @@ void CSlave::SendAliveThreadFunc()
 void CSlave::MonitorStatusThreadFunc()
 {
 	
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
+	int ret = 0;
+	struct timeval now;
+	struct timespec outtime;
 
 	while (isRecvStatus)
 	{
+		if (set_thread_exit_flag)break;
 		//fprintf(stderr,"sem_wait\n");
-		sem_wait(&sem);
-		//usleep(30000);//30ms
-		pthread_testcancel();
-		usleep(400000);//400ms
-		pthread_testcancel();
-		//sleep(1);
-		//fprintf(stderr,"sleep \n");
-		//delay(250);   //延时1s
-		if (isGetStatus == true)
+		//sem_wait(&sem);
+
+		gettimeofday(&now, NULL);
+		timeraddMS(&now, 5);//ms级别
+		outtime.tv_sec = now.tv_sec;
+		outtime.tv_nsec = now.tv_usec * 1000;
+		while ((ret = sem_timedwait(&sem, &outtime) == -1) && errno == EINTR)
+			continue;
+
+		if (ret < 0)
 		{
-			if (myCallBackFunc != NULL)
+			if (errno == ETIMEDOUT)
 			{
-				ResponeData r = { slavemap,"","",SETCHANNEL ,STATUSFREE };
-				onData(myCallBackFunc, LOCALSETCHANNELSTATUS, r);
+				ret = 1;
+				continue;
+				//timeout
+			}
+			else
+			{
+				ret = -1;
+				break;
+				//failed
+			}
+		}
+		else
+		{
+			//usleep(30000);//30ms
+			//pthread_testcancel();
+			usleep(400000);//400ms
+			//pthread_testcancel();
+			//sleep(1);
+			//fprintf(stderr,"sleep \n");
+			//delay(250);   //延时1s
+			if (isGetStatus == true)
+			{
+				if (myCallBackFunc != NULL)
+				{
+					ResponeData r = { slavemap, "", "", SETCHANNEL, STATUSFREE };
+					onData(myCallBackFunc, LOCALSETCHANNELSTATUS, r);
+				}
 			}
 		}
 
 	}
+
+	fprintf(stderr, "exit MonitorStatusThreadFunc\n");
+	pthread_exit(NULL);
+
 }
 int CSlave::Send2Master(char* pSendBuf ,int length)
 {

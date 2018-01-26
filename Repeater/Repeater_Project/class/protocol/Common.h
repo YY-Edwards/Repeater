@@ -13,6 +13,9 @@
 #include <unistd.h>
 #include <map>
 #include <semaphore.h>  
+#include <errno.h>
+#include <sys/time.h>
+#include "AudioQueue.h"
 #define                    UDPPORT                              9000
 #define                    BUFLENGTH                            1024
 #define                    REGISTER                             0

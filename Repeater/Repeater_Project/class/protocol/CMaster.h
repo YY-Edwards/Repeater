@@ -37,6 +37,15 @@ private:
 	time_t convert_string_to_time_t(const std::string & time_string);
 	void SlaveBeginRecordVoice(std::string ip);
 	void SlaveEndRecorderVoice(std::string ip);
+
+
+	bool set_thread_exit_flag;
+
+	/*
+	设置线程退出标志
+	*/
+	void SetThreadExitFlag()   { set_thread_exit_flag = true; }
+
 	
 	int sockfd;
 	//SOCKET sockfd;

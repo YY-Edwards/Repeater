@@ -23,13 +23,19 @@ CMaster::CMaster()
 
 CMaster::~CMaster()
 {
+
+	SetThreadExitFlag();
+
+	pthread_join(id, NULL);
+	pthread_join(aliveId, NULL);
+
 	pthread_mutex_destroy(&m_mapLocker);
 	pthread_mutex_destroy(&m_onDataLocker);
 	pthread_mutex_destroy(&m_sendLocker);
 	pthread_mutex_destroy(&m_aliveLocker);
 
-	pthread_cancel(id);
-	pthread_cancel(aliveId);
+	//pthread_cancel(id);
+	//pthread_cancel(aliveId);
 
 
 	fprintf(stderr, "delete class CMaster\n");
@@ -103,8 +109,8 @@ void CMaster::CreateRecvThread()
 	{
 		//fprintf(stderr,"Create monitor alive thread sucess!\n");
 	}
-	pthread_detach(id);
-	pthread_detach(aliveId);
+	//pthread_detach(id);
+	//pthread_detach(aliveId);
 }
 void*  /*DWORD WINAPI*/ CMaster::RecvThread(void */*LPVOID*/ p)
 {
@@ -126,18 +132,20 @@ void*  /*DWORD WINAPI*/ CMaster::MonitorAliveThread(void */*LPVOID*/ p)
 }
 void CMaster::MonitorAliveThreadFunc()
 {
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 
 	while (isRecvStatus)
 	{
+		if (set_thread_exit_flag)break;
+
 		pthread_mutex_lock(&m_aliveLocker);
 		isAlive = false;
 		pthread_mutex_unlock(&m_aliveLocker);
 
-		pthread_testcancel();
+		//pthread_testcancel();
 		sleep(60);
-		pthread_testcancel();
+		//pthread_testcancel();
 
 		pthread_mutex_lock(&m_aliveLocker);
 		if (!isAlive)
@@ -154,20 +162,29 @@ void CMaster::MonitorAliveThreadFunc()
 		pthread_mutex_unlock(&m_aliveLocker);
 
 	}
+
+	fprintf(stderr, "exit MonitorAliveThreadFunc\n");
+	pthread_exit(NULL);
 }
 void CMaster::RecvThreadFunc()
 {
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+	int ret = -1;
+	socklen_t  len = sizeof(struct sockaddr_in);
+	struct timeval timeout;
+	timeout.tv_sec = 10*1000 / 1000;
+	timeout.tv_usec = (10*1000 % 1000) * 1000;
+	ret = ret | (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == 0 ? 0 : 0x2);
 
 	while (isRecvStatus)
 	{
+		if (set_thread_exit_flag)break;
 		//int  len = sizeof(struct sockaddr_in);
-		socklen_t  len = sizeof(struct sockaddr_in);
 		memset(recvBuf,0,BUFLENGTH);
-		pthread_testcancel();
-		int ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
-		pthread_testcancel();
+		//pthread_testcancel();
+		ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
+		//pthread_testcancel();
 		if (-1 != ret)
 		{
 		
@@ -215,6 +232,10 @@ void CMaster::RecvThreadFunc()
 		}
 		usleep(5000);
 	}
+
+	fprintf(stderr, "exit Recvthread\n");
+	pthread_exit(NULL);
+
 }
 
 void CMaster::SendAlive2Slave(std::string slaveIp)

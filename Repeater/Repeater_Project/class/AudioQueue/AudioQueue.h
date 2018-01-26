@@ -40,6 +40,19 @@ public:
 typedef RepeaterAudioPacket*	P_RepeaterAudioBuffer;
 
 
+#define FIFODEEP  40
+#pragma pack(push, 1)
+typedef struct{
+	char		data[320];
+	uint8_t		len;
+
+}fifoqueue_t;
+
+#pragma pack(pop)
+
+
+//时间a的值增加ms毫秒 
+void timeraddMS(struct timeval *a, unsigned int ms);
 
 class AudioQueue 
 {
@@ -50,10 +63,10 @@ class AudioQueue
 
 	public:
 		bool  			PushToQueue(void *packet, int len);
-		//unsigned int 	TakeFromQueue(void *packet, int& len, int waitTime);
-		//unsigned int 	TakeFromQueueForSpeex(void *packet, int& len, int waitTime);
-		unsigned int 	TakeFromQueue(void *packet, int& len);
-		unsigned int 	TakeFromQueueForSpeex(void *packet, int& len);
+		 int 			TakeFromQueue(void *packet, int& len, int waitTime);
+		 //int 			TakeFromQueueForSpeex(void *packet, int& len, int waitTime);
+		//unsigned int 	TakeFromQueue(void *packet, int& len);
+		//unsigned int 	TakeFromQueueForSpeex(void *packet, int& len);
 		void			ClearQueue();
 		bool 			QueueIsEmpty();
 
@@ -61,8 +74,10 @@ class AudioQueue
 		sem_t								m_hSemaphore;
 		pthread_mutex_t						m_hLocker;//init mutex
 		//std::list<P_RepeaterAudioBuffer>  	m_list;
-		std::list<char *>  	m_list;
-		char fifobuff[20][320];
+		//std::list<char *>  	m_list;
+		std::list<fifoqueue_t *>  	m_list;
+		fifoqueue_t fifobuff[FIFODEEP];
+		//char fifobuff[20][320];
 		unsigned int fifo_counter;
 
 	

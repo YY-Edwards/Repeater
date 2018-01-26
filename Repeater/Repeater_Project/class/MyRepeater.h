@@ -32,6 +32,7 @@
 #include <poll.h>
 #include <signal.h> 
 #include <stdint.h>
+#include <errno.h>
 
 
 typedef enum
@@ -194,20 +195,27 @@ private :
 
 	void Set_RecordAndTimePoll_Event();
 	void Reset_RecordAndTimePoll_Event();
-	void Wait_Record_Event();
-	void Wait_TimePoll_Event();
+	int Wait_Record_Event();
+	int Wait_TimePoll_Event();
 
 	void Set_Playback_Event();
 	void Reset_Playback_Event();
-	void Wait_Playback_Event();
+	int Wait_Playback_Event();
 
 	void Set_RTPRecv_Event();
 	void Reset_RTPRecv_Event();
-	void Wait_RTPRecv_Event();
+	int Wait_RTPRecv_Event();
 
 	static MyRepeater * pThis;   //静态对象指针
 
 	volatile unsigned int Configurable_delay_time;
+
+	bool set_thread_exit_flag;
+
+	/*
+	设置线程退出标志
+	*/
+	void SetThreadExitFlag()   { set_thread_exit_flag = true; }
 
 	
 };

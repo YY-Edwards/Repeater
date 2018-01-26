@@ -32,6 +32,15 @@ private:
 	void Sendmap2Repeater(int mapCount);
 	time_t convert_string_to_time_t(const std::string & time_string);
 	void SendAlive2Master();
+
+
+	bool set_thread_exit_flag;
+
+	/*
+	设置线程退出标志
+	*/
+	void SetThreadExitFlag()   { set_thread_exit_flag = true; }
+
 	
 	int sockfd;
 	struct sockaddr_in rmtAddr;
