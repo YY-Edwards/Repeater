@@ -1644,7 +1644,7 @@ int MyRepeater::Wait_Record_Event()
 	pthread_mutex_lock(&CD_cond_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 20);//ms级别
+	timeraddMS(&now, 2);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
@@ -1652,19 +1652,20 @@ int MyRepeater::Wait_Record_Event()
 		//fprintf(stderr, "mulcastport poll  is ready\n");
 		//ret = pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
 		wait_ret = pthread_cond_timedwait(&CD_trigger_cond, &CD_cond_mutex, &outtime);
-		if (wait_ret == ETIMEDOUT)
+		if (wait_ret == 0)
 		{
-			stop_send_rtp_flag = 0;
-			//my_alsa->record_prepare();
-			ret = 1;
-
-		}
-		else if (wait_ret == 0)//waitcond
-		{
-			my_alsa->record_prepare();
 			my_alsa->record_start();
 			fprintf(stderr, "record  is running\n");
 		}
+	}
+	if (wait_ret == ETIMEDOUT)
+	{
+		stop_send_rtp_flag = 0;
+		ret = 1;
+	}
+	else//wait the cond or CD_Trigger!=0
+	{
+		ret = 0;
 	}
 	pthread_mutex_unlock(&CD_cond_mutex);
 
@@ -1683,7 +1684,7 @@ int MyRepeater::Wait_TimePoll_Event()
 	pthread_mutex_lock(&CD_cond_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 20);//ms级别
+	timeraddMS(&now, 10);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
@@ -1692,16 +1693,16 @@ int MyRepeater::Wait_TimePoll_Event()
 		//ret = pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
 		wait_ret = pthread_cond_timedwait(&CD_trigger_cond, &CD_cond_mutex, &outtime);
 		//fprintf(stderr, "pthread_cond_timedwait ret : %d\n", ret);
-		if (wait_ret == ETIMEDOUT)
-		{
-			stop_send_rtp_flag = 0;
-			ret = 1;
-
-		}
-		else if (wait_ret == 0)//waitcond
-		{
+		if (wait_ret ==0)
 			fprintf(stderr, "Timekeeper   is running\n");
-		}
+	}
+	if (wait_ret == ETIMEDOUT)
+	{
+		ret = 1;
+	}
+	else//wait the cond or CD_Trigger!=0
+	{
+		ret = 0;
 	}
 	pthread_mutex_unlock(&CD_cond_mutex);
 
@@ -1737,7 +1738,7 @@ int MyRepeater::Wait_Playback_Event()
 	pthread_mutex_lock(&playback_start_flag_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 20);//ms级别
+	timeraddMS(&now, 3);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
@@ -1745,18 +1746,21 @@ int MyRepeater::Wait_Playback_Event()
 		//fprintf(stderr, "mulcastport poll  is ready\n");
 		//ret = pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
 		wait_ret = pthread_cond_timedwait(&playback_cond, &playback_start_flag_mutex, &outtime);
-		if (wait_ret == ETIMEDOUT)
+		if (wait_ret == 0)
 		{
-			//my_alsa->play_prepare();
-			ret = 1;
-
-		}
-		else if (wait_ret == 0)//waitcond
-		{
-			my_alsa->play_prepare();
 			my_alsa->play_start();
 			fprintf(stderr, "playback  is running\n");
 		}
+	}
+	if (wait_ret == ETIMEDOUT)
+	{
+		//my_alsa->play_prepare();
+		ret = 1;
+
+	}
+	else//wait the cond or playback_start_flag!=0
+	{
+		ret = 0;
 	}
 	pthread_mutex_unlock(&playback_start_flag_mutex);
 
@@ -1791,7 +1795,7 @@ int MyRepeater::Wait_RTPRecv_Event()
 	pthread_mutex_lock(&poll_cond_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 20);//ms级别
+	timeraddMS(&now, 5);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
@@ -1799,16 +1803,20 @@ int MyRepeater::Wait_RTPRecv_Event()
 		//fprintf(stderr, "mulcastport poll  is ready\n");
 		//ret = pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
 		wait_ret = pthread_cond_timedwait(&mulcast_poll_cond, &poll_cond_mutex, &outtime);
-		if (wait_ret == ETIMEDOUT)
-		{
-			ret = 1;
-
-		}
-		else if (wait_ret == 0)//waitcond
+		if (wait_ret == 0)
 		{
 			fprintf(stderr, "mulcastport poll  is running\n");
 			gettimeofday(&start, NULL);
 		}
+	}
+	if (wait_ret == ETIMEDOUT)
+	{
+		ret = 1;
+
+	}
+	else//wait the cond or Mulcast_Trigger!=0
+	{
+		ret = 0;
 	}
 	pthread_mutex_unlock(&poll_cond_mutex);
 

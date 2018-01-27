@@ -341,15 +341,15 @@ void AudioAlsa::alsa_params_config()
 
 		snd_pcm_sw_params_free(p_swparams);
 
-		//if ((err = snd_pcm_prepare(playback_handle)) < 0){
-		//	fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
-		//	exit(1);
-		//}
+		if ((err = snd_pcm_prepare(playback_handle)) < 0){
+			fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+			exit(1);
+		}
 
-		//if ((err = snd_pcm_prepare(capture_handle)) < 0){
-		//	fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
-		//	exit(1);
-		//}
+		if ((err = snd_pcm_prepare(capture_handle)) < 0){
+			fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
+			exit(1);
+		}
 
 		fprintf(stderr, "alsa-audio-params config  success\n");
 
