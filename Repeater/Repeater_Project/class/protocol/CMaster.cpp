@@ -8,6 +8,7 @@
 
 CMaster::CMaster()
 {
+	set_thread_exit_flag = false;
 	isRecvStatus = true;
 	socketOpen = false;
 	isAlive = false;

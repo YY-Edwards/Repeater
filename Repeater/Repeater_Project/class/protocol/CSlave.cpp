@@ -2,6 +2,7 @@
 #include "CSlave.h"
 CSlave::CSlave()
 {
+	set_thread_exit_flag = false;
 	isRecvStatus = true;
 	isSendAlive = false;
 	isRecvedmap = false;
@@ -151,9 +152,9 @@ void CSlave::CreateRecvThread()
 	{
 		//fprintf(stderr,"Create monitor thread sucess!\n");
 	}
-	pthread_detach(id);
-	pthread_detach(aliveId);
-	pthread_detach(monitorId);
+	//pthread_detach(id);
+	//pthread_detach(aliveId);
+	//pthread_detach(monitorId);
 }
 void* /*DWORD WINAPI */CSlave::RecvThread(void*/*LPVOID*/ p)
 {
@@ -384,20 +385,21 @@ void CSlave::MonitorStatusThreadFunc()
 		timeraddMS(&now, 5);//ms¼¶±ð
 		outtime.tv_sec = now.tv_sec;
 		outtime.tv_nsec = now.tv_usec * 1000;
-		while ((ret = sem_timedwait(&sem, &outtime) == -1) && errno == EINTR)
-			continue;
 
-		if (ret < 0)
+		while ((ret = sem_timedwait(&sem, &outtime) != 0) && errno == EINTR)
+			continue;
+		//fprintf(stderr, "sem_timedwait ret: %d, errno:%d (%s)\n", ret, errno, strerror(errno));
+		if (ret != 0)
 		{
 			if (errno == ETIMEDOUT)
 			{
-				ret = 1;
+				//ret = 1;
 				continue;
 				//timeout
 			}
 			else
 			{
-				ret = -1;
+				//ret = -1;
 				break;
 				//failed
 			}

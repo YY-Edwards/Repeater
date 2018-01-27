@@ -432,8 +432,8 @@ void MyRepeater::DecodeThreadFunc()
 
 		}
 	}
-
-	fprintf(stderr, "exit Decode_thread \n");
+	//fprintf(stderr, "m_DecodeQueue.TakeFromQueue return : %d\n", temp);
+	fprintf(stderr, "exit Decodethread \n");
 	pthread_exit(NULL);
 }
 
@@ -796,7 +796,7 @@ void MyRepeater::repeater_task_start()
 
 	fprintf(stderr, "start to pthread...\n");
 	fprintf(stderr, "\r\n$/***********************************/&\r\n");
-	sleep(1);
+	//sleep(1);
 	//led_thread
 	//err = pthread_create(&id_led, NULL, LedIndicatorThread, this);
 	//if (err != 0){
@@ -1109,7 +1109,7 @@ void MyRepeater::EncodeThreadFunc()
 	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 	fprintf(stderr, "EncodeThread is running...\n");
-	while ((temp = m_EncodeQueue.TakeFromQueue(buff, (int&)size, 20)) >= 0)
+	while ((temp = m_EncodeQueue.TakeFromQueue(buff, (int&)size, 20))>= 0)
 	{
 		if (set_thread_exit_flag)break;
 		//pthread_testcancel();
@@ -1137,7 +1137,9 @@ void MyRepeater::EncodeThreadFunc()
 			//continue;
 		}
 	}
-	fprintf(stderr, "EncodeThread is exit...\n");
+	//fprintf(stderr, "m_EncodeQueue.TakeFromQueue return : %d\n", temp);
+	fprintf(stderr, "exit EncodeThread\n");
+
 	pthread_exit(NULL);
 }
 
@@ -1335,7 +1337,7 @@ void MyRepeater::RTPsendThreadFunc()
 	if (pSess != NULL)
 		delete pSess;
 
-	fprintf(stderr, "exit pthread :rtp_send_pthread\n");
+	fprintf(stderr, "exit rtp_send_pthread\n");
 	pthread_exit(NULL);
 
 
@@ -1430,7 +1432,7 @@ void MyRepeater::MulcastPortPollThreadFunc()
 
 	//pthread_cleanup_pop(0);
 	my_recvrtp->BYEDestroy(RTPTime(1, 0), 0, 0);
-	fprintf(stderr, "exit pthread :mulcastport_poll_pthread\n");
+	fprintf(stderr, "exit mulcastport_poll_pthread\n");
 	pthread_exit(NULL);
 }
 
@@ -1635,29 +1637,31 @@ void MyRepeater::Reset_RecordAndTimePoll_Event()
 int MyRepeater::Wait_Record_Event()
 {
 	int ret = 0;
+	int wait_ret = 0;
 	struct timeval now;
 	struct timespec outtime;
 
 	pthread_mutex_lock(&CD_cond_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 5);//ms级别
+	timeraddMS(&now, 20);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
-	while (CD_Trigger == 0){
+	while (CD_Trigger == 0 && wait_ret != ETIMEDOUT){
 		//fprintf(stderr, "mulcastport poll  is ready\n");
 		//ret = pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
-		ret = pthread_cond_timedwait(&CD_trigger_cond, &CD_cond_mutex, &outtime);
-		if (ret == ETIMEDOUT)
+		wait_ret = pthread_cond_timedwait(&CD_trigger_cond, &CD_cond_mutex, &outtime);
+		if (wait_ret == ETIMEDOUT)
 		{
 			stop_send_rtp_flag = 0;
-			my_alsa->record_prepare();
+			//my_alsa->record_prepare();
 			ret = 1;
 
 		}
-		else if(ret == 0)//waitcond
+		else if (wait_ret == 0)//waitcond
 		{
+			my_alsa->record_prepare();
 			my_alsa->record_start();
 			fprintf(stderr, "record  is running\n");
 		}
@@ -1672,30 +1676,30 @@ int MyRepeater::Wait_Record_Event()
 int MyRepeater::Wait_TimePoll_Event()
 {
 	int ret = 0;
+	int wait_ret = 0;
 	struct timeval now;
 	struct timespec outtime;
 
 	pthread_mutex_lock(&CD_cond_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 5);//ms级别
+	timeraddMS(&now, 20);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
-	while (CD_Trigger == 0){
+	while (CD_Trigger == 0 && wait_ret != ETIMEDOUT){
 		//fprintf(stderr, "mulcastport poll  is ready\n");
 		//ret = pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
-		ret = pthread_cond_timedwait(&CD_trigger_cond, &CD_cond_mutex, &outtime);
-		if (ret == ETIMEDOUT)
+		wait_ret = pthread_cond_timedwait(&CD_trigger_cond, &CD_cond_mutex, &outtime);
+		//fprintf(stderr, "pthread_cond_timedwait ret : %d\n", ret);
+		if (wait_ret == ETIMEDOUT)
 		{
 			stop_send_rtp_flag = 0;
-			my_alsa->record_prepare();
 			ret = 1;
 
 		}
-		else if (ret == 0)//waitcond
+		else if (wait_ret == 0)//waitcond
 		{
-			my_alsa->record_start();
 			fprintf(stderr, "Timekeeper   is running\n");
 		}
 	}
@@ -1726,28 +1730,30 @@ void MyRepeater::Reset_Playback_Event()
 int MyRepeater::Wait_Playback_Event()
 {
 	int ret = 0;
+	int wait_ret = 0;
 	struct timeval now;
 	struct timespec outtime;
 
 	pthread_mutex_lock(&playback_start_flag_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 5);//ms级别
+	timeraddMS(&now, 20);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
-	while (playback_start_flag == 0){
+	while (playback_start_flag == 0 && wait_ret != ETIMEDOUT){
 		//fprintf(stderr, "mulcastport poll  is ready\n");
 		//ret = pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
-		ret = pthread_cond_timedwait(&playback_cond, &playback_start_flag_mutex, &outtime);
-		if (ret == ETIMEDOUT)
+		wait_ret = pthread_cond_timedwait(&playback_cond, &playback_start_flag_mutex, &outtime);
+		if (wait_ret == ETIMEDOUT)
 		{
-			my_alsa->play_prepare();
+			//my_alsa->play_prepare();
 			ret = 1;
 
 		}
-		else if(ret == 0)//waitcond
+		else if (wait_ret == 0)//waitcond
 		{
+			my_alsa->play_prepare();
 			my_alsa->play_start();
 			fprintf(stderr, "playback  is running\n");
 		}
@@ -1778,26 +1784,27 @@ void MyRepeater::Reset_RTPRecv_Event()
 int MyRepeater::Wait_RTPRecv_Event()
 {
 	int ret = 0;
+	int wait_ret = 0;
 	struct timeval now;
 	struct timespec outtime;
 
 	pthread_mutex_lock(&poll_cond_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 5);//ms级别
+	timeraddMS(&now, 20);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
-	while (Mulcast_Trigger == 0){
+	while (Mulcast_Trigger == 0 && wait_ret != ETIMEDOUT){
 		//fprintf(stderr, "mulcastport poll  is ready\n");
 		//ret = pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
-		ret = pthread_cond_timedwait(&mulcast_poll_cond, &poll_cond_mutex, &outtime);
-		if (ret == ETIMEDOUT)
+		wait_ret = pthread_cond_timedwait(&mulcast_poll_cond, &poll_cond_mutex, &outtime);
+		if (wait_ret == ETIMEDOUT)
 		{
 			ret = 1;
 
 		}
-		else if (ret == 0)//waitcond
+		else if (wait_ret == 0)//waitcond
 		{
 			fprintf(stderr, "mulcastport poll  is running\n");
 			gettimeofday(&start, NULL);

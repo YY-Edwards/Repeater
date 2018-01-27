@@ -22,9 +22,12 @@ void timeraddMS(struct timeval *a, unsigned int ms)
 
 AudioQueue::AudioQueue()
 {
-	
+	int ret = 0;
 	pthread_mutex_init(&m_hLocker, NULL);
-	sem_init(&m_hSemaphore, 0, 0);
+	ret = sem_init(&m_hSemaphore, 0, 0);
+	if (ret < 0 )
+		fprintf(stderr, "sem_init fail\n");
+
 	for (int i = 0; i < FIFODEEP; i++){
 		memset(&(fifobuff[i].data), 0x00, 512);
 		memset(&(fifobuff[i].len), 0x00, sizeof(uint8_t));
@@ -47,7 +50,7 @@ AudioQueue::~AudioQueue()
 	pthread_mutex_destroy(&m_hLocker);
 	sem_destroy(&m_hSemaphore);
 
-	fprintf(stderr,"delete class AudioQueue\n");
+	//fprintf(stderr,"delete class AudioQueue\n");
 	
 }
 
@@ -109,10 +112,10 @@ int AudioQueue::TakeFromQueue(void *packet, int& len, int waitTime)
 	timeraddMS(&now, waitTime);//ms¼¶±ð
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
-	while ((ret = sem_timedwait(&m_hSemaphore, &outtime) == -1) && errno == EINTR)
+	while ((ret = sem_timedwait(&m_hSemaphore, &outtime) != 0) && errno == EINTR)
 		continue;
-
-	if (ret < 0)
+	//fprintf(stderr, "sem_timedwait ret: %d, errno:%d (%s)\n", ret, errno, strerror(errno));
+	if (ret!=0)
 	{
 		if (errno == ETIMEDOUT)
 		{

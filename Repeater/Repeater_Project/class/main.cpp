@@ -12,8 +12,11 @@ void signal_handler(int signo)
 	fprintf(stderr, "\nHave caught sig N.O. %d\n", signo);
 
 	signal(signo, SIG_DFL);
+	if (my_repeater != NULL){
 
-	delete my_repeater;
+		delete my_repeater;
+		my_repeater = NULL;
+	}
 
 	exit(0);
 
@@ -21,6 +24,7 @@ void signal_handler(int signo)
 
 int main(void)
 {
+
 	signal(SIGINT, signal_handler);
 	signal(SIGTERM, signal_handler);
 	signal(SIGABRT, signal_handler);
@@ -28,11 +32,15 @@ int main(void)
 	my_repeater->Start();
 
 	while (1)
-	{
-		sleep(1);
+	{	
+		sleep(10);
 	}
 
-	delete my_repeater;
+	if (my_repeater != NULL){
+
+		delete my_repeater;
+		my_repeater = NULL;
+	}
 
 	return 0;
 	

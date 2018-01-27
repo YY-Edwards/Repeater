@@ -33,7 +33,7 @@ private:
 	time_t convert_string_to_time_t(const std::string & time_string);
 	void SendAlive2Master();
 
-
+	
 	bool set_thread_exit_flag;
 
 	/*
