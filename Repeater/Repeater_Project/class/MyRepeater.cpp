@@ -159,6 +159,22 @@ void MyRepeater::Stop()
 	pthread_join(id_time, NULL);
 	pthread_join(id_encode, NULL);
 	pthread_join(id_encode, NULL);
+
+	CD_Trigger = 0;
+	Mulcast_Trigger = 0;
+	channel_busy_flag = 0;
+	playback_start_flag = 0;
+	audio_codec_err_counter = 0;
+	basedevice_ID = 0;
+	stop_send_rtp_flag = 0;
+	channel_applied_flag = 0;
+	slave_busy = 0;
+	timeout_flag = 0;
+	Configurable_delay_time = 0;
+	rtp_can_send = 0;
+	set_thread_exit_flag = false;
+
+
 }
 
 void MyRepeater::Start()
