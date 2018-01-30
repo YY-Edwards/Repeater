@@ -24,6 +24,7 @@
     <ClCompile Include="class\protocol\CMaster.cpp" />
     <ClCompile Include="class\protocol\CSlave.cpp" />
     <ClCompile Include="class\protocol\Protocol.cpp" />
+    <ClCompile Include="class\protocol\socketwarp\socketwrap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="class\AudioAlsa\AudioAlsa.h" />
@@ -39,6 +40,7 @@
     <ClInclude Include="class\protocol\Common.h" />
     <ClInclude Include="class\protocol\CSlave.h" />
     <ClInclude Include="class\protocol\Protocol.h" />
+    <ClInclude Include="class\protocol\socketwarp\socketwrap.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{857F0505-97AD-4C05-8576-4B54988AA003}</ProjectGuid>
@@ -71,7 +73,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\AudioAlsa\Speex;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\protocol;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\Myrtp;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\Monitor_Interface;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\json-file;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\GPIO_App;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\AudioQueue;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\AudioAlsa;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Repeaterproject\remote-repeater\Repeater\Repeater\Repeater_Project\class\protocol\socketwarp;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\AudioAlsa\Speex;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\protocol;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\Myrtp;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\Monitor_Interface;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\json-file;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\GPIO_App;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\AudioQueue;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class\AudioAlsa;G:\Repeaterproject\Analog Repeater Voice\Repeater\Repeater_Project\class;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

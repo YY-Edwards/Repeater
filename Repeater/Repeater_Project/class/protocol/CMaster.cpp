@@ -171,67 +171,134 @@ void CMaster::RecvThreadFunc()
 {
 	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
-	int ret = -1;
-	socklen_t  len = sizeof(struct sockaddr_in);
+	//int ret = -1;
+	//socklen_t  len = sizeof(struct sockaddr_in);
 	struct timeval timeout;
 	timeout.tv_sec = 10*1000 / 1000;
 	timeout.tv_usec = (10*1000 % 1000) * 1000;
 	ret = ret | (setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) == 0 ? 0 : 0x2);
+	char opcode = '\0';
 
 	while (isRecvStatus)
 	{
 		if (set_thread_exit_flag)break;
 		//int  len = sizeof(struct sockaddr_in);
-		memset(recvBuf,0,BUFLENGTH);
+		//memset(recvBuf,0,BUFLENGTH);
 		//pthread_testcancel();
-		ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
+		//ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
 		//pthread_testcancel();
-		if (-1 != ret)
+
+		SocketRecv(sockfd, &recvBuf[0], BUFLENGTH, rt);
+		if (rt.nbytes > 0)
 		{
-		
-			std::string rmtIp = inet_ntoa(rmtAddr.sin_addr);
-			switch (static_cast<char>(recvBuf[0]))
+			std::string rmtIp = inet_ntoa(rt.rmtaddr.sin_addr);
+			for (int i =0; i < rt.nbytes; i++)
 			{
-			case static_cast<char>(RegisterOpcode) :
-				fprintf(stderr,"recvRegister \n");
-				Sendmap2Repeater(rmtIp);
-				Sendmap2Slave();
-				break;
-			case static_cast<char>(AliveOpcode):
-				fprintf(stderr,"recvAlive:%s\n", rmtIp.c_str());
-				pthread_mutex_lock(&m_aliveLocker);
-				isAlive = true;
-				pthread_mutex_unlock(&m_aliveLocker);
-				SendAlive2Slave(rmtIp);
-				Updatemap(rmtIp);
-				break;
-			case static_cast<char>(GetChannelStatusOpcode):
-				fprintf(stderr,"recvGetChannelStatus\n");
-				if (myCallBackFunc != NULL)
+				opcode = recvBuf[i];
+				switch (static_cast<char>(opcode))
 				{
-					//fprintf(stderr,"myCallBackFunc\n");
-					if ("" == getStatusIp)
+				case static_cast<char>(RegisterOpcode) :
+					fprintf(stderr, "recvRegister \n");
+					Sendmap2Repeater(rmtIp);
+					Sendmap2Slave();
+					break;
+				case static_cast<char>(AliveOpcode) :
+					fprintf(stderr, "recvAlive:%s\n", rmtIp.c_str());
+					pthread_mutex_lock(&m_aliveLocker);
+					isAlive = true;
+					pthread_mutex_unlock(&m_aliveLocker);
+					SendAlive2Slave(rmtIp);
+					Updatemap(rmtIp);
+					break;
+				case static_cast<char>(GetChannelStatusOpcode) :
+					fprintf(stderr, "recvGetChannelStatus\n");
+					if (myCallBackFunc != NULL)
 					{
-						getStatusIp = rmtIp;
+						//fprintf(stderr,"myCallBackFunc\n");
+						if ("" == getStatusIp)
+						{
+							getStatusIp = rmtIp;
+						}
+						ResponeData r = { slavemap, rmtIp, "", GETCHANNEL, -1 };
+						onData(myCallBackFunc, GETCHANNELSTATUS, r);
 					}
-					ResponeData r = {slavemap, rmtIp,"",GETCHANNEL,-1 };
-					onData(myCallBackFunc, GETCHANNELSTATUS, r);
+					break;
+				case static_cast<char>(ReleaseChannelOpcode) :
+					fprintf(stderr, "recvReleaseChannel\n");
+					if (myCallBackFunc != NULL)
+					{
+						ResponeData r = { slavemap, "", rmtIp, RELEASECHANNNEL, -1 };
+						onData(myCallBackFunc, RELEASECHANNELSTATUS, r);
+						//SlaveEndRecorderVoice(rmtIp);
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			case static_cast<char>(ReleaseChannelOpcode):
-				fprintf(stderr,"recvReleaseChannel\n");
-				if (myCallBackFunc != NULL)
-				{
-					ResponeData r = {slavemap,"",rmtIp,RELEASECHANNNEL,-1 };
-					onData(myCallBackFunc, RELEASECHANNELSTATUS, r);
-					//SlaveEndRecorderVoice(rmtIp);
-				}
-				break;
-			default:
-				break;
 			}
+			//usleep(5000);
+			memset(&recvBuf[0], 0, BUFLENGTH);//clear recvBuf[BUFLENGTH];
+
 		}
-		usleep(5000);
+		else if ((rt.nbytes == -1) && (rt.nresult == 1))
+		{
+			std::cout << "SocketRecv Timeout\n" << std::endl;
+		}
+		else if ((rt.nresult == -1))
+		{
+			std::cout << "Client close socket\n" << std::endl;
+			//return_value = -1;
+			//break;
+		}
+		else
+		{
+		}
+		//if (-1 != ret)
+		//{
+		//
+		//	std::string rmtIp = inet_ntoa(rmtAddr.sin_addr);
+		//	switch (static_cast<char>(recvBuf[0]))
+		//	{
+		//	case static_cast<char>(RegisterOpcode) :
+		//		fprintf(stderr,"recvRegister \n");
+		//		Sendmap2Repeater(rmtIp);
+		//		Sendmap2Slave();
+		//		break;
+		//	case static_cast<char>(AliveOpcode):
+		//		fprintf(stderr,"recvAlive:%s\n", rmtIp.c_str());
+		//		pthread_mutex_lock(&m_aliveLocker);
+		//		isAlive = true;
+		//		pthread_mutex_unlock(&m_aliveLocker);
+		//		SendAlive2Slave(rmtIp);
+		//		Updatemap(rmtIp);
+		//		break;
+		//	case static_cast<char>(GetChannelStatusOpcode):
+		//		fprintf(stderr,"recvGetChannelStatus\n");
+		//		if (myCallBackFunc != NULL)
+		//		{
+		//			//fprintf(stderr,"myCallBackFunc\n");
+		//			if ("" == getStatusIp)
+		//			{
+		//				getStatusIp = rmtIp;
+		//			}
+		//			ResponeData r = {slavemap, rmtIp,"",GETCHANNEL,-1 };
+		//			onData(myCallBackFunc, GETCHANNELSTATUS, r);
+		//		}
+		//		break;
+		//	case static_cast<char>(ReleaseChannelOpcode):
+		//		fprintf(stderr,"recvReleaseChannel\n");
+		//		if (myCallBackFunc != NULL)
+		//		{
+		//			ResponeData r = {slavemap,"",rmtIp,RELEASECHANNNEL,-1 };
+		//			onData(myCallBackFunc, RELEASECHANNELSTATUS, r);
+		//			//SlaveEndRecorderVoice(rmtIp);
+		//		}
+		//		break;
+		//	default:
+		//		break;
+		//	}
+		//}
+		//usleep(5000);
 	}
 
 	fprintf(stderr, "exit Recvthread\n");

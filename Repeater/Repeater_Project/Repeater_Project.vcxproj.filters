@@ -43,6 +43,9 @@
     <Filter Include="源文件\AudioAlsa\Speex">
       <UniqueIdentifier>{e3da969f-eb24-4d38-b87c-0b8d485075ca}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Protocol\socketwrap">
+      <UniqueIdentifier>{00108779-8fa4-436e-88ed-f006c3d592c3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="class\AudioAlsa\AudioAlsa.cpp">
@@ -84,6 +87,9 @@
     <ClCompile Include="class\AudioAlsa\Speex\myspeex.cpp">
       <Filter>源文件\AudioAlsa\Speex</Filter>
     </ClCompile>
+    <ClCompile Include="class\protocol\socketwarp\socketwrap.cpp">
+      <Filter>源文件\Protocol\socketwrap</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="class\AudioAlsa\AudioAlsa.h">
@@ -124,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="class\AudioAlsa\Speex\myspeex.h">
       <Filter>源文件\AudioAlsa\Speex</Filter>
+    </ClInclude>
+    <ClInclude Include="class\protocol\socketwarp\socketwrap.h">
+      <Filter>源文件\Protocol\socketwrap</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

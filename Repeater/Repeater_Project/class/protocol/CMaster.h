@@ -65,6 +65,7 @@ private:
 	std::string getStatusIp;
 	bool isAlive;
 	
+	transresult_t rt;
 
 	pthread_t id;
 	pthread_t aliveId;
