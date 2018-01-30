@@ -5,20 +5,22 @@
 * Author: EDWARDS
 */
 #include "MyRepeater.h"
-MyRepeater *my_repeater = new MyRepeater;
+
+int exit_flag = 0;
 
 void signal_handler(int signo)
 {
+	signal(signo, signal_handler);
 	fprintf(stderr, "\nHave caught sig N.O. %d\n", signo);
-
 	signal(signo, SIG_DFL);
-	if (my_repeater != NULL){
 
-		delete my_repeater;
-		my_repeater = NULL;
-	}
+	exit_flag = signo;
 
-	exit(0);
+	//if (my_repeater != NULL){
+	//	delete my_repeater;
+	//	my_repeater = NULL;
+	//}
+	//exit(0);
 
 }
 
@@ -29,14 +31,18 @@ int main(void)
 	signal(SIGTERM, signal_handler);
 	signal(SIGABRT, signal_handler);
 
+	MyRepeater *my_repeater = new MyRepeater;
+
 	my_repeater->Start();
 
-	while (1)
+	while (exit_flag != 0)
 	{	
-		sleep(10);
+		usleep(500*1000);
 	}
 
 	if (my_repeater != NULL){
+
+		my_repeater->Stop();
 
 		delete my_repeater;
 		my_repeater = NULL;

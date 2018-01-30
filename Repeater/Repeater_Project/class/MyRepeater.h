@@ -58,6 +58,7 @@ class MyRepeater
 	 MyRepeater();
 	 ~MyRepeater();
 	void Start();
+	void Stop();
 	
 private :
 

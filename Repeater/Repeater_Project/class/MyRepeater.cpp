@@ -67,16 +67,16 @@ MyRepeater::MyRepeater()
 MyRepeater::~MyRepeater()
 {
 	
-	SetThreadExitFlag();
+	//SetThreadExitFlag();
 
-	pthread_join(id_CDpoll, NULL);
-	pthread_join(id_record, NULL);
-	pthread_join(id_playback, NULL);
-	pthread_join(id_rtppoll, NULL);
-	pthread_join(id_rtpsend, NULL);
-	pthread_join(id_time, NULL);
-	pthread_join(id_encode, NULL);
-	pthread_join(id_encode, NULL);
+	//pthread_join(id_CDpoll, NULL);
+	//pthread_join(id_record, NULL);
+	//pthread_join(id_playback, NULL);
+	//pthread_join(id_rtppoll, NULL);
+	//pthread_join(id_rtpsend, NULL);
+	//pthread_join(id_time, NULL);
+	//pthread_join(id_encode, NULL);
+	//pthread_join(id_encode, NULL);
 
 	/*pthread_cancel(id_CDpoll);
 	pthread_cancel(id_rtppoll);
@@ -147,6 +147,19 @@ MyRepeater::~MyRepeater()
 
 }
 
+void MyRepeater::Stop()
+{
+	SetThreadExitFlag();
+
+	pthread_join(id_CDpoll, NULL);
+	pthread_join(id_record, NULL);
+	pthread_join(id_playback, NULL);
+	pthread_join(id_rtppoll, NULL);
+	pthread_join(id_rtpsend, NULL);
+	pthread_join(id_time, NULL);
+	pthread_join(id_encode, NULL);
+	pthread_join(id_encode, NULL);
+}
 
 void MyRepeater::Start()
 {

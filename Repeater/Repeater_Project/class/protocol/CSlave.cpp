@@ -218,23 +218,32 @@ void CSlave::RecvThreadFunc()
 				switch (static_cast<char>(opcode))
 				{
 				case static_cast<char>(mapOpcode) :
-					if (rt.nbytes < 2)break;
+					mapCount = recvBuf[1];
+					if (rt.nbytes < (mapCount*4+2)){
+						fprintf(stderr, "notice:need to stick socketwrap\n");
+						break;
+					}
 					fprintf(stderr, "recvmap\n");
 					isRecvedmap = true;
 					isSendAlive = true;   //开启心跳线程
-					mapCount = recvBuf[1];
-					i+=1;//指针位移一位
 					Sendmap2Repeater(mapCount);
+					i += (mapCount * 4 + 1);//指针位移
 					break;
 				case static_cast<char>(AliveOpcode) :
 					//fprintf(stderr,"recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
-					fprintf(stderr, "recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
+					fprintf(stderr, "recvAlive:%s\n", strIp);
 					localtime(&t);
 					pthread_mutex_lock(&lastRecvAliveTimeLocker);
 					strftime(lastRecvAliveTime, sizeof(lastRecvAliveTime), "%Y-%m-%d %H:%M:%S", localtime(&t));
 					pthread_mutex_unlock(&lastRecvAliveTimeLocker);
+					i += (4);//指针位移
 					break;
 				case static_cast<char>(SetChannelStatusOpcode) :
+					if (rt.nbytes < 6)
+					{
+						fprintf(stderr, "notice:need to stick socketwrap\n");
+						break;
+					}
 					fprintf(stderr, "recvSetChannelStatus\n");
 					pthread_mutex_lock(&m_statusLocker);
 					isGetStatus = false;
@@ -242,7 +251,7 @@ void CSlave::RecvThreadFunc()
 					if (myCallBackFunc != NULL)
 					{
 						temp = (int)recvBuf[5];
-
+						i += 5;//指针位移5位
 						//fprintf(stderr,"recvBuf[5] is : %d\n", recvBuf[5]);
 						//fprintf(stderr,"temp : %d\n", temp);
 
