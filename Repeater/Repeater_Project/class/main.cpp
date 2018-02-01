@@ -35,7 +35,7 @@ int main(void)
 
 	my_repeater->Start();
 
-	while (exit_flag != 0)
+	while (exit_flag == 0)
 	{	
 		usleep(500*1000);
 	}
