@@ -200,7 +200,8 @@ void CSlave::RecvThreadFunc()
 	{
 		//int  len = sizeof(struct sockaddr_in);
 		//bzero(recvBuf, sizeof(recvBuf));
-		if (set_thread_exit_flag)break;
+		if (set_thread_exit_flag)break;//UDP传输不考虑粘包拆包事宜
+
 		//pthread_testcancel();
 		//ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
 		//pthread_testcancel();
@@ -212,9 +213,9 @@ void CSlave::RecvThreadFunc()
 		{
 			std::string  strIp = inet_ntoa(rt.rmtaddr.sin_addr);
 			int mapCount = 0;
-			for (int i = 0; i < rt.nbytes; i++)
+			//for (int i = 0; i < rt.nbytes; i++)
 			{
-				opcode = recvBuf[i];
+				opcode = recvBuf[0];
 				switch (static_cast<char>(opcode))
 				{
 				case static_cast<char>(mapOpcode) :
@@ -227,7 +228,6 @@ void CSlave::RecvThreadFunc()
 					isRecvedmap = true;
 					isSendAlive = true;   //开启心跳线程
 					Sendmap2Repeater(mapCount);
-					i += (mapCount * 4 + 1);//指针位移
 					break;
 				case static_cast<char>(AliveOpcode) :
 					//fprintf(stderr,"recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
@@ -236,7 +236,7 @@ void CSlave::RecvThreadFunc()
 					pthread_mutex_lock(&lastRecvAliveTimeLocker);
 					strftime(lastRecvAliveTime, sizeof(lastRecvAliveTime), "%Y-%m-%d %H:%M:%S", localtime(&t));
 					pthread_mutex_unlock(&lastRecvAliveTimeLocker);
-					i += (4);//指针位移
+
 					break;
 				case static_cast<char>(SetChannelStatusOpcode) :
 					if (rt.nbytes < 6)
@@ -251,7 +251,6 @@ void CSlave::RecvThreadFunc()
 					if (myCallBackFunc != NULL)
 					{
 						temp = (int)recvBuf[5];
-						i += 5;//指针位移5位
 						//fprintf(stderr,"recvBuf[5] is : %d\n", recvBuf[5]);
 						//fprintf(stderr,"temp : %d\n", temp);
 

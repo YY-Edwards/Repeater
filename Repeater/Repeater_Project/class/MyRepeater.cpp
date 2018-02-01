@@ -1455,6 +1455,7 @@ void MyRepeater::MulcastPortPollThreadFunc()
 			}
 			else
 			{//timeout
+				gettimeofday(&start, NULL);
 			}
 
 	}
@@ -1673,7 +1674,7 @@ int MyRepeater::Wait_Record_Event()
 	pthread_mutex_lock(&CD_cond_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 2);//ms级别
+	timeraddMS(&now, 2000);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
@@ -1713,7 +1714,7 @@ int MyRepeater::Wait_TimePoll_Event()
 	pthread_mutex_lock(&CD_cond_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 10);//ms级别
+	timeraddMS(&now, 1000);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
@@ -1767,7 +1768,7 @@ int MyRepeater::Wait_Playback_Event()
 	pthread_mutex_lock(&playback_start_flag_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 3);//ms级别
+	timeraddMS(&now, 800);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
@@ -1824,7 +1825,7 @@ int MyRepeater::Wait_RTPRecv_Event()
 	pthread_mutex_lock(&poll_cond_mutex);
 
 	gettimeofday(&now, NULL);
-	timeraddMS(&now, 5);//ms级别
+	timeraddMS(&now, 700);//ms级别
 	outtime.tv_sec = now.tv_sec;
 	outtime.tv_nsec = now.tv_usec * 1000;
 
@@ -1835,7 +1836,6 @@ int MyRepeater::Wait_RTPRecv_Event()
 		if (wait_ret == 0)
 		{
 			fprintf(stderr, "mulcastport poll  is running\n");
-			gettimeofday(&start, NULL);
 		}
 	}
 	if (wait_ret == ETIMEDOUT)

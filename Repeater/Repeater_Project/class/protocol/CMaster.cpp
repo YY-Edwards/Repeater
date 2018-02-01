@@ -192,9 +192,9 @@ void CMaster::RecvThreadFunc()
 		if (rt.nbytes > 0)
 		{
 			std::string rmtIp = inet_ntoa(rt.rmtaddr.sin_addr);
-			for (int i =0; i < rt.nbytes; i++)
+			//for (int i =0; i < rt.nbytes; i++)
 			{
-				opcode = recvBuf[i];
+				opcode = recvBuf[0];
 				switch (static_cast<char>(opcode))
 				{
 				case static_cast<char>(RegisterOpcode) :
