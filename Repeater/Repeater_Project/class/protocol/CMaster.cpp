@@ -24,6 +24,7 @@ CMaster::CMaster()
 
 CMaster::~CMaster()
 {
+	CloseSocket(sockfd);
 
 	SetThreadExitFlag();
 
@@ -171,7 +172,7 @@ void CMaster::RecvThreadFunc()
 {
 	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
-	//int ret = -1;
+	int ret = -1;
 	//socklen_t  len = sizeof(struct sockaddr_in);
 	struct timeval timeout;
 	timeout.tv_sec = 10*1000 / 1000;
@@ -242,7 +243,7 @@ void CMaster::RecvThreadFunc()
 		}
 		else if ((rt.nbytes == -1) && (rt.nresult == 1))
 		{
-			std::cout << "SocketRecv Timeout\n" << std::endl;
+			//std::cout << "SocketRecv Timeout\n" << std::endl;
 		}
 		else if ((rt.nresult == -1))
 		{

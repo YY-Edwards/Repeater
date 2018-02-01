@@ -22,7 +22,7 @@ typedef struct
 {
 	int nbytes;
 	int nresult;
-	struct sockaddr rmtaddr;
+	struct sockaddr_in rmtaddr;
 } transresult_t;
 
 int InitializeSocketEnvironment();

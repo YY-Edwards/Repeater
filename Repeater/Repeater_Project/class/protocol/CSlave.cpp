@@ -23,6 +23,7 @@ CSlave::CSlave()
 
 CSlave::~CSlave()
 {
+	CloseSocket(sockfd);
 
 	SetThreadExitFlag();
 	pthread_join(id, NULL);
@@ -231,7 +232,7 @@ void CSlave::RecvThreadFunc()
 					break;
 				case static_cast<char>(AliveOpcode) :
 					//fprintf(stderr,"recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
-					fprintf(stderr, "recvAlive:%s\n", strIp);
+					fprintf(stderr, "recvAlive:%s\n", strIp.c_str());
 					localtime(&t);
 					pthread_mutex_lock(&lastRecvAliveTimeLocker);
 					strftime(lastRecvAliveTime, sizeof(lastRecvAliveTime), "%Y-%m-%d %H:%M:%S", localtime(&t));
@@ -287,7 +288,7 @@ void CSlave::RecvThreadFunc()
 		}
 		else if ((rt.nbytes == -1) && (rt.nresult == 1))
 		{
-			std::cout << "SocketRecv Timeout\n" << std::endl;
+			//std::cout << "SocketRecv Timeout\n" << std::endl;
 		}
 		else if ((rt.nresult == -1))
 		{

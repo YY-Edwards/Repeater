@@ -14,6 +14,7 @@
 #include <map>
 #include <semaphore.h>  
 #include <errno.h>
+#include <fcntl.h>
 #include <sys/time.h>
 #include "AudioQueue.h"
 #include "socketwrap.h"
