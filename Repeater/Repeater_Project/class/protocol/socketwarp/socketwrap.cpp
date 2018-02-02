@@ -16,7 +16,7 @@
 #define BLOCKREADWRITE      MSG_WAITALL  
 #define NONBLOCKREADWRITE   MSG_DONTWAIT  
 #define SENDNOSIGNAL        MSG_NOSIGNAL  
-#define ETRYAGAIN(x)        (x==EAGAIN||x==EWOULDBLOCK)  
+#define ETRYAGAIN(x)        (x==EAGAIN||x==EWOULDBLOCK||x==EINTR)  //是否需要添加EINTR
 #define gxsprintf           snprintf  
 
 #endif  
@@ -152,7 +152,9 @@ void SocketRecv(HSocket hs, char *ptr, int nbytes, transresult_t &rt)
 	else
 	{
 		rt.nresult = GetLastSocketError();
+		//fprintf(stderr, "rt.nresult:%d \n", rt.nresult);
 		rt.nresult = ETRYAGAIN(rt.nresult) ? 1 : -1;
+
 	}
 
 }

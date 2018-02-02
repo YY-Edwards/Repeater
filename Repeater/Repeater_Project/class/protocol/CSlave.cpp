@@ -293,6 +293,7 @@ void CSlave::RecvThreadFunc()
 		else if ((rt.nresult == -1))
 		{
 			std::cout << "Client close socket\n" << std::endl;
+			break;
 		}
 		else
 		{

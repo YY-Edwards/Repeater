@@ -1286,7 +1286,7 @@ void MyRepeater::RTPsendThreadFunc()
 
 	size = my_alsa->get_playback_period_size();
 
-	Myrtp *pSess = new Myrtp();
+	//Myrtp *pSess = new Myrtp();
 
 	char package_send_buffer[20];
 	bzero(package_send_buffer, 20);
@@ -1330,10 +1330,10 @@ void MyRepeater::RTPsendThreadFunc()
 			{
 				string key = it->first;
 
-				pSess = it->second;
-
+				//pSess = it->second;
 				//status = pSess->SendPacket(package_send_buffer, 320, 0, false, 160);
-				status = pSess->SendPacket(package_send_buffer, 20, 0, false, 160);
+				//status = pSess->SendPacket(package_send_buffer, 20, 0, false, 160);
+				status = it->second->SendPacket(package_send_buffer, 20, 0, false, 160);
 				checkerror(status);
 				send_counter++;
 				if (send_counter > 139){
@@ -1358,13 +1358,16 @@ void MyRepeater::RTPsendThreadFunc()
 
 	for (it = sessionmap.begin(); it != sessionmap.end(); it++)
 	{
-		pSess = it->second;
-
-		pSess->BYEDestroy(RTPTime(1, 0), 0, 0);
+		/*pSess = it->second;
+		pSess->BYEDestroy(RTPTime(1, 0), 0, 0);*/
+		it->second->BYEDestroy(RTPTime(1, 0), 0, 0); 
 
 	}
-	if (pSess != NULL)
-		delete pSess;
+	//if (pSess != NULL)
+	//{
+	//	delete pSess;
+	//	pSess = NULL;
+	//}
 
 	fprintf(stderr, "exit rtp_send_pthread\n");
 	pthread_exit(NULL);

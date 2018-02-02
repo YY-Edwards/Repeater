@@ -249,7 +249,7 @@ void CMaster::RecvThreadFunc()
 		{
 			std::cout << "Client close socket\n" << std::endl;
 			//return_value = -1;
-			//break;
+			break;
 		}
 		else
 		{
