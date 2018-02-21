@@ -347,7 +347,7 @@ void MyRepeater::setTimer(int seconds, int useconds)
 
 	temp.tv_usec = useconds;
 
-	select(0, NULL, NULL, NULL, &temp);
+	select(0, NULL, NULL, NULL, &temp);//注意windows下，三个参数不能都传递NULL，否则会返回-1错误
 
 	//counter++;
 
