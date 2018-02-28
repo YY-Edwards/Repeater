@@ -44,7 +44,7 @@ typedef RepeaterAudioPacket*	P_RepeaterAudioBuffer;
 #pragma pack(push, 1)
 typedef struct{
 	char		data[320];
-	uint8_t		len;
+	int			len;
 
 }fifoqueue_t;
 
