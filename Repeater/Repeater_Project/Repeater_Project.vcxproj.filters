@@ -13,117 +13,141 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\AudioAlsa">
+    <Filter Include="AudioAlsa">
       <UniqueIdentifier>{20e81f44-76c4-4c30-a1f4-17c6f8fa93dc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\AudioQueue">
+    <Filter Include="AudioAlsa\Speex">
+      <UniqueIdentifier>{e3da969f-eb24-4d38-b87c-0b8d485075ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AudioQueue">
       <UniqueIdentifier>{dfb367ea-590e-4908-928d-8bafaca5db2e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\GPIO_App">
+    <Filter Include="GPIO_App">
       <UniqueIdentifier>{be6a9bf4-efe6-4b5f-ae6f-173d6474caa7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Monitor_Interface">
+    <Filter Include="Monitor_Interface">
       <UniqueIdentifier>{7e862577-e5ed-4278-a341-d803178f9d8e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Myrtp">
+    <Filter Include="Myrtp">
       <UniqueIdentifier>{c02702df-7434-40cb-b27d-f578696c04ba}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Protocol">
+    <Filter Include="Protocol">
       <UniqueIdentifier>{21565829-05a7-40ea-b637-91e8ef3642d3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Protocol\master">
+    <Filter Include="Protocol\master">
       <UniqueIdentifier>{f3f43061-ed5b-4980-9e42-aa692b4385e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Protocol\slave">
+    <Filter Include="Protocol\slave">
       <UniqueIdentifier>{0fa9ab5b-de6a-4c87-a736-ceafd65a6510}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Protocol\connect_prorocol">
+    <Filter Include="Protocol\connect_prorocol">
       <UniqueIdentifier>{59f5fe1e-50b2-403c-83f1-b00f68dfecba}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\AudioAlsa\Speex">
-      <UniqueIdentifier>{e3da969f-eb24-4d38-b87c-0b8d485075ca}</UniqueIdentifier>
+    <Filter Include="PublicInterface">
+      <UniqueIdentifier>{4eb70f85-f7e6-4ad9-839b-a86d61c6896e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="class\AudioAlsa\AudioAlsa.cpp">
-      <Filter>源文件\AudioAlsa</Filter>
+      <Filter>AudioAlsa</Filter>
     </ClCompile>
     <ClCompile Include="class\AudioQueue\AudioQueue.cpp">
-      <Filter>源文件\AudioQueue</Filter>
+      <Filter>AudioQueue</Filter>
     </ClCompile>
     <ClCompile Include="class\GPIO_App\GPIO_App.cpp">
-      <Filter>源文件\GPIO_App</Filter>
+      <Filter>GPIO_App</Filter>
     </ClCompile>
     <ClCompile Include="class\Myrtp\Myrtp.cpp">
-      <Filter>源文件\Myrtp</Filter>
+      <Filter>Myrtp</Filter>
     </ClCompile>
     <ClCompile Include="class\Monitor_Interface\Monitor_Interface.cpp">
-      <Filter>源文件\Monitor_Interface</Filter>
+      <Filter>Monitor_Interface</Filter>
     </ClCompile>
     <ClCompile Include="class\main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="class\GPIO_App\gpio.cpp">
-      <Filter>源文件\GPIO_App</Filter>
+      <Filter>GPIO_App</Filter>
     </ClCompile>
     <ClCompile Include="class\protocol\CMaster.cpp">
-      <Filter>源文件\Protocol\master</Filter>
+      <Filter>Protocol\master</Filter>
     </ClCompile>
     <ClCompile Include="class\protocol\Protocol.cpp">
-      <Filter>源文件\Protocol\connect_prorocol</Filter>
+      <Filter>Protocol\connect_prorocol</Filter>
     </ClCompile>
     <ClCompile Include="class\protocol\CSlave.cpp">
-      <Filter>源文件\Protocol\slave</Filter>
+      <Filter>Protocol\slave</Filter>
     </ClCompile>
     <ClCompile Include="class\json-file\MFile.cpp">
-      <Filter>源文件\Monitor_Interface</Filter>
+      <Filter>Monitor_Interface</Filter>
     </ClCompile>
     <ClCompile Include="class\MyRepeater.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="class\AudioAlsa\Speex\myspeex.cpp">
-      <Filter>源文件\AudioAlsa\Speex</Filter>
+      <Filter>AudioAlsa\Speex</Filter>
+    </ClCompile>
+    <ClCompile Include="class\PublicInterface\FifoQueue\fifoqueue.cpp">
+      <Filter>PublicInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="class\PublicInterface\SocketWrap\socketwrap.cpp">
+      <Filter>PublicInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="class\PublicInterface\SynInterface\syninterface.cpp">
+      <Filter>PublicInterface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="class\AudioAlsa\AudioAlsa.h">
-      <Filter>源文件\AudioAlsa</Filter>
+      <Filter>AudioAlsa</Filter>
     </ClInclude>
     <ClInclude Include="class\AudioQueue\AudioQueue.h">
-      <Filter>源文件\AudioQueue</Filter>
+      <Filter>AudioQueue</Filter>
     </ClInclude>
     <ClInclude Include="class\GPIO_App\GPIO_App.h">
-      <Filter>源文件\GPIO_App</Filter>
+      <Filter>GPIO_App</Filter>
     </ClInclude>
     <ClInclude Include="class\Monitor_Interface\Monitor_Interface.h">
-      <Filter>源文件\Monitor_Interface</Filter>
+      <Filter>Monitor_Interface</Filter>
     </ClInclude>
     <ClInclude Include="class\Myrtp\Myrtp.h">
-      <Filter>源文件\Myrtp</Filter>
+      <Filter>Myrtp</Filter>
     </ClInclude>
     <ClInclude Include="class\GPIO_App\gpio.h">
-      <Filter>源文件\GPIO_App</Filter>
+      <Filter>GPIO_App</Filter>
     </ClInclude>
     <ClInclude Include="class\protocol\CMaster.h">
-      <Filter>源文件\Protocol\master</Filter>
+      <Filter>Protocol\master</Filter>
     </ClInclude>
     <ClInclude Include="class\protocol\Protocol.h">
-      <Filter>源文件\Protocol\connect_prorocol</Filter>
+      <Filter>Protocol\connect_prorocol</Filter>
     </ClInclude>
     <ClInclude Include="class\protocol\CSlave.h">
-      <Filter>源文件\Protocol\slave</Filter>
+      <Filter>Protocol\slave</Filter>
     </ClInclude>
     <ClInclude Include="class\protocol\Common.h">
-      <Filter>源文件\Protocol</Filter>
+      <Filter>Protocol</Filter>
     </ClInclude>
     <ClInclude Include="class\json-file\MFile.h">
-      <Filter>源文件\Monitor_Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="class\MyRepeater.h">
-      <Filter>源文件</Filter>
+      <Filter>Monitor_Interface</Filter>
     </ClInclude>
     <ClInclude Include="class\AudioAlsa\Speex\myspeex.h">
-      <Filter>源文件\AudioAlsa\Speex</Filter>
+      <Filter>AudioAlsa\Speex</Filter>
+    </ClInclude>
+    <ClInclude Include="class\MyRepeater.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="class\PublicInterface\FifoQueue\fifoqueue.h">
+      <Filter>PublicInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="class\PublicInterface\SocketWrap\socketwrap.h">
+      <Filter>PublicInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="class\PublicInterface\SynInterface\syninterface.h">
+      <Filter>PublicInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="class\config.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

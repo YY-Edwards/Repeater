@@ -19,7 +19,7 @@
 #include "log.h"
 
 #define FIFODEEP  30
-#define DATADEEP  1500
+#define DATADEEP  512
 #pragma pack(push, 1)
 typedef struct{
 	char	data[DATADEEP];

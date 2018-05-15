@@ -4,7 +4,9 @@
 #define ON	1
 #define OFF 0
 
-
+#include "config.h"
+#include "syninterface.h"
+#include "fifoqueue.h"
 #include "Monitor_Interface.h"
 #include "GPIO_App.h"
 #include "AudioQueue.h"
@@ -15,23 +17,6 @@
 #include "CMaster.h"
 #include "CSlave.h"
 #include "Protocol.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <linux/input.h>
-#include <sys/time.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <signal.h> 
-#include <poll.h>
-#include <signal.h> 
-#include <stdint.h>
 
 
 typedef enum
@@ -81,40 +66,62 @@ private :
 	struct  timeval end;
 
 
+
+	MySynSem *CD_trigger_cond;
+	MySynSem *mulcast_poll_cond;
+	MySynSem *send_rtp_cond;
+	MySynSem *playback_cond;
+	
+
 	//init mutex, cond, sem
-	 pthread_mutex_t CD_cond_mutex;
-	 pthread_cond_t CD_trigger_cond;
+	// pthread_mutex_t CD_cond_mutex;
+	// pthread_cond_t CD_trigger_cond;
 
-	 pthread_mutex_t poll_cond_mutex;
-	 pthread_cond_t mulcast_poll_cond;
+	// pthread_mutex_t poll_cond_mutex;
+	// pthread_cond_t mulcast_poll_cond;
 
 
-	pthread_mutex_t send_rtp_cond_mutex;
-	pthread_cond_t send_rtp_cond;
+	//pthread_mutex_t send_rtp_cond_mutex;
+	//pthread_cond_t send_rtp_cond;
 
-	//pthread_mutex_t playback_cond_mutex;
-	pthread_cond_t playback_cond;
-		
+	////pthread_mutex_t playback_cond_mutex;
+	//pthread_cond_t playback_cond;
+	
+
+	FifoQueue m_RtpSendQueue;
+	FifoQueue m_PlayBackQueue;
+	FifoQueue m_EncodeQueue;
+	FifoQueue m_DecodeQueue;
+
 	//init queue
-	AudioQueue 	m_RtpSendQueue;
-	AudioQueue 	m_PlayBackQueue;
-	AudioQueue 	m_EncodeQueue;
-	AudioQueue 	m_DecodeQueue;
+	//AudioQueue 	m_RtpSendQueue;
+	//AudioQueue 	m_PlayBackQueue;
+	//AudioQueue 	m_EncodeQueue;
+	//AudioQueue 	m_DecodeQueue;
 
+
+	MyCreateThread * cd_poll_thread_p;
+	MyCreateThread * record_thread_p;
+	MyCreateThread * playback_thread_p;
+	MyCreateThread * rtp_poll_thread_p;
+	MyCreateThread * rtp_send_thread_p;
+	MyCreateThread * timer_thread_p;
+	MyCreateThread * encode_thread_p;
+	MyCreateThread * decode_thread_p;
 
 	//init pthread ID
-	pthread_t id_CDpoll;
-	pthread_t id_record;
-	pthread_t id_playback;
-	pthread_t id_rtppoll;
-	pthread_t id_rtpsend;
-	pthread_t id_time;
-	pthread_t id_led;
-	pthread_t id_encode;
-	pthread_t id_decode;
+	//pthread_t id_CDpoll;
+	//pthread_t id_record;
+	//pthread_t id_playback;
+	//pthread_t id_rtppoll;
+	//pthread_t id_rtpsend;
+	//pthread_t id_time;
+	//pthread_t id_led;
+	//pthread_t id_encode;
+	//pthread_t id_decode;
 
-	pthread_attr_t attr1, attr2, attr3, attr4;
-	struct sched_param param;
+	/*pthread_attr_t attr1, attr2, attr3, attr4;
+	struct sched_param param;*/
 
 
 	//init buffer point 
@@ -122,20 +129,22 @@ private :
 	char *playback_buffer;
 
 	//Global flag
-	pthread_mutex_t flag_mutex ;
-	volatile unsigned int CD_Trigger ;//0: invalid; 1:actived
-	volatile unsigned int Mulcast_Trigger;//0: invalid; 1:actived
+	Mutex *flag_mutex;
+	//pthread_mutex_t flag_mutex ;
+	volatile unsigned int CD_Trigger_flag ;//0: invalid; 1:actived
+	volatile unsigned int Mulcast_Trigger_flag;//0: invalid; 1:actived
 	/****master-use****/
 	volatile unsigned int channel_busy_flag ;
 	/****master-use****/
 
-	pthread_mutex_t playback_start_flag_mutex;
+	Mutex *playback_start_flag_mutex;
+	//pthread_mutex_t playback_start_flag_mutex;
 	volatile unsigned int playback_start_flag;//wait 5p to playback
 
 	volatile unsigned int audio_codec_err_counter;
 
-
-	pthread_mutex_t map_mutex;
+	Mutex *map_mutex;
+	//pthread_mutex_t map_mutex;
 	//std::map <std::string, std::string> devicemap;
 
 	std::map <std::string, std::string> base_masterMap;
