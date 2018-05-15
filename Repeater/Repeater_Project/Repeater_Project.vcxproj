@@ -13,7 +13,6 @@
   <ItemGroup>
     <ClCompile Include="class\AudioAlsa\AudioAlsa.cpp" />
     <ClCompile Include="class\AudioAlsa\Speex\myspeex.cpp" />
-    <ClCompile Include="class\AudioQueue\AudioQueue.cpp" />
     <ClCompile Include="class\GPIO_App\gpio.cpp" />
     <ClCompile Include="class\GPIO_App\GPIO_App.cpp" />
     <ClCompile Include="class\json-file\MFile.cpp" />
@@ -31,7 +30,6 @@
   <ItemGroup>
     <ClInclude Include="class\AudioAlsa\AudioAlsa.h" />
     <ClInclude Include="class\AudioAlsa\Speex\myspeex.h" />
-    <ClInclude Include="class\AudioQueue\AudioQueue.h" />
     <ClInclude Include="class\config.h" />
     <ClInclude Include="class\GPIO_App\gpio.h" />
     <ClInclude Include="class\GPIO_App\GPIO_App.h" />

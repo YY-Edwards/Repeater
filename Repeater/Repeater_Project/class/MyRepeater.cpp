@@ -767,18 +767,18 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 		}
 		else{//free
 
-			if (slave_busy)break;
+			if (slave_busy_flag)break;
 			if (command == LOCALSETCHANNELSTATUS){
 
 				//if (CD_Trigger == 0)break;//cd has released
 				if (my_gpio_app->get_cd_current_value() == HIGH_LEVEL)break;//cd has released
-				if (Mulcast_Trigger == 1){
+				if (Mulcast_Trigger_flag == 1){
 					fprintf(stderr, "Slave RTP is Recv...\n");
 					break;
 				}//salve处于正在接收状态，CD触发，主机无响应，本地转发响应，则应该忽略
 				fprintf(stderr, "Master is not work!!!...\n");
 				stop_send_rtp_flag = 1;
-				slave_busy = 1;
+				slave_busy_flag = 1;
 			}
 
 			flag_mutex->Lock();//lock-flag
@@ -802,7 +802,7 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 	case BEGINRECORDERVOICE:
 
 		if (channel_applied_flag)break;
-		if (slave_busy)break;
+		if (slave_busy_flag)break;
 
 		fprintf(stderr, "Remote Voice begin\n");
 
@@ -828,7 +828,7 @@ void MyRepeater::SlaveOnDataFunc(int command, ResponeData data)
 			channel_applied_flag = 0;
 			break;
 		}
-		if (slave_busy)break;
+		if (slave_busy_flag)break;
 		if (!playback_start_flag)break;
 
 		fprintf(stderr, "Remote Voice end\n");
@@ -1866,7 +1866,7 @@ void MyRepeater::Wait_Playback_Event()
 void MyRepeater::Set_RTPRecv_Event()
 {
 	//pthread_mutex_lock(&poll_cond_mutex);//lock-flag
-	//Mulcast_Trigger = 1;
+	//Mulcast_Trigger_flag = 1;
 	//pthread_cond_signal(&mulcast_poll_cond);//active mulcast_poll_pthread
 	//pthread_mutex_unlock(&poll_cond_mutex);//lock-flag
 
@@ -1877,7 +1877,7 @@ void MyRepeater::Set_RTPRecv_Event()
 }
 void MyRepeater::Reset_RTPRecv_Event()
 {
-	//Mulcast_Trigger = 0;
+	//Mulcast_Trigger_flag = 0;
 	Mulcast_Trigger_flag = 0;
 	mulcast_poll_cond->Clear_Trigger_Flag();
 
@@ -1888,7 +1888,7 @@ void MyRepeater::Wait_RTPRecv_Event()
 
 	mulcast_poll_cond->CondWait(0);
 	//pthread_mutex_lock(&poll_cond_mutex);
-	//while (Mulcast_Trigger == 0){
+	//while (Mulcast_Trigger_flag == 0){
 	//	fprintf(stderr, "mulcastport poll  is ready\n");
 	//	pthread_cond_wait(&mulcast_poll_cond, &poll_cond_mutex);
 	//	fprintf(stderr, "mulcastport poll  is running\n");

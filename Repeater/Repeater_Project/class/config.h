@@ -13,11 +13,13 @@
 #include <linux/input.h>
 #include <sys/time.h>
 #include <pthread.h>
+#include <semaphore.h>  
 #include <unistd.h>
 #include <signal.h> 
 #include <poll.h>
 #include <signal.h> 
 #include <stdint.h>
+#include <errno.h>
 
 
 

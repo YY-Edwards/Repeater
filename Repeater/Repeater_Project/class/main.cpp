@@ -16,7 +16,7 @@ void signal_handler(int signo)
 	// Reinstantiate signal handler
 	signal(signo, signal_handler);
 	{
-		exit_flag = sig_num;
+		exit_flag = signo;
 	}
 
 }
