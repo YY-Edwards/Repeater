@@ -943,11 +943,11 @@ void MyRepeater::repeater_task_start()
 	//	fprintf(stderr, "CD_poll_thread  create fail...\n");
 	//}
 
-	cd_poll_thread_p = new MyCreateThread(CDPollThread, this);
-	if (cd_poll_thread_p == NULL)
-	{
-		fprintf(stderr, "CD_poll_thread  create fail...\n");
-	}
+	//cd_poll_thread_p = new MyCreateThread(CDPollThread, this);
+	//if (cd_poll_thread_p == NULL)
+	//{
+	//	fprintf(stderr, "CD_poll_thread  create fail...\n");
+	//}
 
 	record_thread_p = new MyCreateThread(RecordThread, this);
 	if (record_thread_p == NULL)
@@ -961,35 +961,35 @@ void MyRepeater::repeater_task_start()
 		fprintf(stderr, "playback_thread_p  create fail...\n");
 	}
 
-	rtp_poll_thread_p = new MyCreateThread(MulcastPortPollThread, this);
-	if (rtp_poll_thread_p == NULL)
-	{
-		fprintf(stderr, "rtp_poll_thread_p  create fail...\n");
-	}
+	//rtp_poll_thread_p = new MyCreateThread(MulcastPortPollThread, this);
+	//if (rtp_poll_thread_p == NULL)
+	//{
+	//	fprintf(stderr, "rtp_poll_thread_p  create fail...\n");
+	//}
 
-	rtp_send_thread_p = new MyCreateThread(RTPsendThread, this);
-	if (rtp_send_thread_p == NULL)
-	{
-		fprintf(stderr, "rtp_send_thread_p  create fail...\n");
-	}
+	//rtp_send_thread_p = new MyCreateThread(RTPsendThread, this);
+	//if (rtp_send_thread_p == NULL)
+	//{
+	//	fprintf(stderr, "rtp_send_thread_p  create fail...\n");
+	//}
 
-	timer_thread_p = new MyCreateThread(TimePollThread, this);
-	if (timer_thread_p == NULL)
-	{
-		fprintf(stderr, "timer_thread_p  create fail...\n");
-	}
+	//timer_thread_p = new MyCreateThread(TimePollThread, this);
+	//if (timer_thread_p == NULL)
+	//{
+	//	fprintf(stderr, "timer_thread_p  create fail...\n");
+	//}
 
-	encode_thread_p = new MyCreateThread(EncodeThread, this);
-	if (encode_thread_p == NULL)
-	{
-		fprintf(stderr, "encode_thread_p  create fail...\n");
-	}
+	//encode_thread_p = new MyCreateThread(EncodeThread, this);
+	//if (encode_thread_p == NULL)
+	//{
+	//	fprintf(stderr, "encode_thread_p  create fail...\n");
+	//}
 
-	decode_thread_p = new MyCreateThread(DecodeThread, this);
-	if (decode_thread_p == NULL)
-	{
-		fprintf(stderr, "decode_thread_p  create fail...\n");
-	}
+	//decode_thread_p = new MyCreateThread(DecodeThread, this);
+	//if (decode_thread_p == NULL)
+	//{
+	//	fprintf(stderr, "decode_thread_p  create fail...\n");
+	//}
 
 
 
@@ -1243,7 +1243,7 @@ void MyRepeater::RecordThreadFunc()
 
 		//fprintf(stderr,"record go\n");
 		//wait for CD_trigger_cond to wakeup the function:record audio
-		Wait_Record_Event();
+		//Wait_Record_Event();
 		if (m_PleaseStopRepeater)break;
 
 		my_alsa->get_record_buf(capture_buffer);
@@ -1256,16 +1256,16 @@ void MyRepeater::RecordThreadFunc()
 		}
 		//pthread_testcancel();
 
-		if (stop_send_rtp_flag == 0){
+		//if (stop_send_rtp_flag == 0){
 
-			//temp = m_RtpSendQueue.PushToQueue((char *)capture_buffer, size);
-			temp = m_EncodeQueue.PushToQueue((char *)capture_buffer, size);
-			if (temp == false)
-			{
-				fprintf(stderr, "m_EncodeQueue PushToQueue full...\n");
-			}
-		}
-		usleep(1500);//1.5ms
+		//	//temp = m_RtpSendQueue.PushToQueue((char *)capture_buffer, size);
+		//	temp = m_EncodeQueue.PushToQueue((char *)capture_buffer, size);
+		//	if (temp == false)
+		//	{
+		//		fprintf(stderr, "m_EncodeQueue PushToQueue full...\n");
+		//	}
+		//}
+		//usleep(1500);//1.5ms
 		//fprintf(stderr, "record_run\n");
 
 	}
@@ -1372,7 +1372,7 @@ void MyRepeater::PlaybackThreadFunc()
 
 	for (;;){
 
-			Wait_Playback_Event();
+			//Wait_Playback_Event();
 			if (m_PleaseStopRepeater)break;
 			/*pthread_testcancel();
 			temp = m_PlayBackQueue.TakeFromQueue((char *)playback_buffer, length);
@@ -1391,7 +1391,7 @@ void MyRepeater::PlaybackThreadFunc()
 					s_counter++;
 					fprintf(stderr, " local-playback 139p, tip:%d\n", s_counter);
 				}
-				usleep(1500);//1.5ms
+				//usleep(1500);//1.5ms
 			}
 			else if (temp > 0){//Queue empty
 				//usleep(30000);//30ms
