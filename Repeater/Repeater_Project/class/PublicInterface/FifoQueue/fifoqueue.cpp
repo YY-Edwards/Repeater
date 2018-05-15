@@ -32,7 +32,7 @@ DynFifoQueue::DynFifoQueue(int fifo_deep, int data_deep)
 		(ptr_fifo + i)->len = 0;
 	}
 
-	log_debug("dynamic queue created\n");
+	//log_debug("dynamic queue created\n");
 }
 
 DynFifoQueue::~DynFifoQueue()
@@ -63,7 +63,7 @@ DynFifoQueue::~DynFifoQueue()
 		delete[]ptr_fifo;
 		ptr_fifo = NULL;
 	}
-	log_debug("delete:dynamic queue\n");
+	//log_debug("delete:dynamic queue\n");
 
 }
 
@@ -80,7 +80,7 @@ bool DynFifoQueue::PushToDynQueue(void *packet, unsigned int len)
 {
 	if (ptr_fifo == NULL)
 	{
-		log_warning("ptr_fifo == NULL\n");
+		//log_warning("ptr_fifo == NULL\n");
 		return false;//no support
 	}
 

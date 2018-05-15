@@ -335,7 +335,7 @@ MyCreateThread::MyCreateThread(void *(*func)(void *), void *ptr)
 	err = pthread_create(&thread_handle, NULL, func, ptr);
 	if (err != 0){
 		//fprintf(stderr, "func create fail...\n");
-		log_warning("thread create fail...\n");
+		//log_warning("thread create fail...\n");
 	}
 	//pthread_detach(thread_handle);//分离创建的线程，线程退出后资源自动回收
 }

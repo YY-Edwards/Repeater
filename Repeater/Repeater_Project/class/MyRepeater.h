@@ -70,10 +70,10 @@ private :
 
 
 
-	MySynSem *CD_trigger_cond;
-	MySynSem *mulcast_poll_cond;
-	MySynSem *send_rtp_cond;
-	MySynSem *playback_cond;
+	MySynCond *CD_trigger_cond;
+	MySynCond *mulcast_poll_cond;
+	MySynCond *send_rtp_cond;
+	MySynCond *playback_cond;
 	
 
 	//init mutex, cond, sem
