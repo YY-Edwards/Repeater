@@ -170,16 +170,26 @@ void MyRepeater::Stop()
 	}
 	if (record_thread_p != NULL)
 	{
+		Set_RecordAndTimePoll_Event();
 		delete record_thread_p;
 		record_thread_p = NULL;
 	}
+	if (timer_thread_p != NULL)
+	{
+		delete timer_thread_p;
+		timer_thread_p = NULL;
+	}
+
+
 	if (playback_thread_p != NULL)
 	{
+		Set_Playback_Event();
 		delete playback_thread_p;
 		playback_thread_p = NULL;
 	}
 	if (rtp_poll_thread_p != NULL)
 	{
+		Set_RTPRecv_Event();
 		delete rtp_poll_thread_p;
 		rtp_poll_thread_p = NULL;
 	}
@@ -188,11 +198,7 @@ void MyRepeater::Stop()
 		delete rtp_send_thread_p;
 		rtp_send_thread_p = NULL;
 	}
-	if (timer_thread_p != NULL)
-	{
-		delete timer_thread_p;
-		timer_thread_p = NULL;
-	}
+	
 	if (encode_thread_p != NULL)
 	{
 		delete encode_thread_p;
@@ -281,8 +287,6 @@ void MyRepeater::Stop()
 		fdset = NULL;
 	}
 
-
-
 }
 void MyRepeater::Start()
 {
@@ -309,6 +313,11 @@ void MyRepeater::Start()
 
 	char tmp[50];
 	bzero(tmp, 50);
+
+	start.tv_sec = 0;
+	start.tv_usec = 0;
+	end.tv_sec = 0;
+	start.tv_usec = 0;
 
 	//get basic config info
 	mulcastip_str = "228.221.2.1";
@@ -561,14 +570,20 @@ void MyRepeater::DecodeThreadFunc()
 			bzero(encode_buff, sizeof(encode_buff));
 
 		}
+		else if (temp > 0){//Queue empty
+			//usleep(30000);//30ms
+			//fprintf(stderr, "play Queue is empty\n");
+			//my_alsa->send_buf_playback(playback_buffer);;
+			continue;
+		}
 		else{
-			//usleep(20000);//20ms
-			//continue;
 
+			fprintf(stderr, "m_DecodeQueue.TakeFromQueue err : %d\n", temp);//nerver happened
+			break;
 		}
 	}
 
-	fprintf(stderr, "exit Decode_thread \n");
+	fprintf(stderr, "exit:Decode thread \n");
 
 }
 
@@ -1189,7 +1204,7 @@ void MyRepeater::CDPollThreadFunc()
 	my_gpio_app->close_cd_fd();
 	free(fdset);
 	fdset = NULL;
-	fprintf(stderr, "exit CD_poll_thread \n");
+	fprintf(stderr, "exit:CD_poll_thread \n");
 
 }
 
@@ -1223,6 +1238,7 @@ void MyRepeater::RecordThreadFunc()
 	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 
 	//pthread_cleanup_push(pthread_mutex_unlock, (void*)&CD_cond_mutex);
+	fprintf(stderr, "record pthread is running...\n");
 	while (1){
 
 		//fprintf(stderr,"record go\n");
@@ -1251,7 +1267,7 @@ void MyRepeater::RecordThreadFunc()
 	free(capture_buffer);
 	capture_buffer = NULL;
 
-	fprintf(stderr, "exit record_pthread \n");
+	fprintf(stderr, "exit:record_pthread \n");
 
 }
 
@@ -1298,12 +1314,16 @@ void MyRepeater::EncodeThreadFunc()
 			usleep(300);//1ms
 			//fprintf(stderr, "Encode Time is :%ld s,%ld us\n", (enc_end.tv_sec - enc_start.tv_sec), (enc_end.tv_usec - enc_start.tv_usec));
 		}
-		else{//Queue empty
-			//usleep(20000);//20ms
-			//continue;
+		else if (temp > 0){//Queue empty
+			continue;
+		}
+		else{
+
+			fprintf(stderr, "m_EncodeQueue.TakeFromQueue err : %d\n", temp);//nerver happened
+			break;
 		}
 	}
-	fprintf(stderr, "EncodeThread is exit...\n");
+	fprintf(stderr, "exit:EncodeThread\n");
 
 }
 
@@ -1340,7 +1360,7 @@ void MyRepeater::PlaybackThreadFunc()
 	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 	//pthread_detach(pthread_self());
-	//fprintf(stderr, "playback pthead is running...\n");
+	fprintf(stderr, "playback pthead is running...\n");
 
 	for (;;){
 
@@ -1365,7 +1385,7 @@ void MyRepeater::PlaybackThreadFunc()
 				}
 				//usleep(1500);//1.5ms
 			}
-			else if (temp < 0){//Queue empty
+			else if (temp > 0){//Queue empty
 				//usleep(30000);//30ms
 				//fprintf(stderr, "play Queue is empty\n");
 				//my_alsa->send_buf_playback(playback_buffer);;
@@ -1382,7 +1402,7 @@ void MyRepeater::PlaybackThreadFunc()
 
 	free(playback_buffer);
 	playback_buffer = NULL;
-	fprintf(stderr, "exit playback_thread \n");
+	fprintf(stderr, "exit:playback_thread \n");
 	//pthread_exit(NULL);
 
 }
@@ -1481,7 +1501,7 @@ void MyRepeater::RTPsendThreadFunc()
 			//usleep(20000);//20ms
 			//fprintf(stderr, "rtp-send_run\n");
 			//fprintf(stderr, "RTP Send is empty\n");
-			continue;
+			//continue;
 		}
 	}
 
@@ -1500,7 +1520,7 @@ void MyRepeater::RTPsendThreadFunc()
 	}
 		
 
-	fprintf(stderr, "exit pthread :rtp_send_pthread\n");
+	fprintf(stderr, "exit:rtp send pthread\n");
 
 
 }
@@ -1527,6 +1547,8 @@ void MyRepeater::MulcastPortPollThreadFunc()
 	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 
 	//pthread_cleanup_push(pthread_mutex_unlock, (void *)&mulcast_poll_cond);
+	fprintf(stderr, "mulcastport poll pthread is running...\n");
+
 	while (1){
 
 			Wait_RTPRecv_Event();
@@ -1590,7 +1612,7 @@ void MyRepeater::MulcastPortPollThreadFunc()
 
 	//pthread_cleanup_pop(0);
 	my_recvrtp->BYEDestroy(RTPTime(1, 0), 0, 0);
-	fprintf(stderr, "exit pthread :mulcastport_poll_pthread\n");
+	fprintf(stderr, "exit: mulcastport poll pthread\n");
 
 }
 
@@ -1613,11 +1635,11 @@ void MyRepeater::TimePollThreadFunc()
 	int cd_level = HIGH_LEVEL;//default HIGH
 	/*pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);*/
-	fprintf(stderr, "timer_poll_pthread is running...\n");
+	fprintf(stderr, "timer poll pthread is running...\n");
 	while (1)
 	{
 		Wait_TimePoll_Event();
-		if (!m_PleaseStopRepeater)break;
+		if (m_PleaseStopRepeater)break;
 
 		gettimeofday(&end, NULL);
 		cd_level = my_gpio_app->get_cd_current_value();//get CD_pin
@@ -1670,7 +1692,7 @@ void MyRepeater::TimePollThreadFunc()
 		}
 
 	}
-	fprintf(stderr, "exit pthread :timer_poll_pthread\n");
+	fprintf(stderr, "exit:timer poll pthread\n");
 
 }
 

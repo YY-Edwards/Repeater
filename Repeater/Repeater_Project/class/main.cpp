@@ -35,6 +35,7 @@ int main(void)
 		if (exit_flag != 0)
 		{
 			my_repeater->Stop();
+			break;
 		}
 		else
 		{
