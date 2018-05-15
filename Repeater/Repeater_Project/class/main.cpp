@@ -34,7 +34,7 @@ int main(void)
 	{
 		if (exit_flag != 0)
 		{
-			delete my_repeater;
+			my_repeater->Stop();
 		}
 		else
 		{
@@ -42,6 +42,8 @@ int main(void)
 		}
 
 	}
+
+	if (my_repeater != NULL)delete my_repeater;
 
 	return 0;
 	

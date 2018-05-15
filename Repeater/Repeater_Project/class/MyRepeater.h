@@ -42,9 +42,12 @@ class MyRepeater
 	 MyRepeater();
 	 ~MyRepeater();
 	void Start();
+	void Stop();
+
 	
 private :
 
+	bool	m_PleaseStopRepeater;
 
 	Monitor_Interface * my_baseinfo ;
 	GPIO_App *my_gpio_app;
@@ -157,7 +160,7 @@ private :
 	/****slave-use****/
 	volatile unsigned int stop_send_rtp_flag;
 	volatile unsigned int channel_applied_flag;
-	volatile unsigned int slave_busy;
+	volatile unsigned int slave_busy_flag;
 	/****slave-use****/
 
 	//void config_hw(uint8_t userport, uint32_t baseip, uint32_t mulcastip);
@@ -217,7 +220,10 @@ private :
 	static MyRepeater * pThis;   //静态对象指针
 
 	volatile unsigned int Configurable_delay_time;
-
+	/*
+	设置线程退出标志
+	*/
+	void SetThreadExitFlag()   { m_PleaseStopRepeater = true; }
 	
 };
 

@@ -5,14 +5,14 @@ MyRepeater *MyRepeater::pThis = NULL;
 
 MyRepeater::MyRepeater()
 :basedevice_ID(0)
-, CD_Trigger(0)
-, Mulcast_Trigger(0)
+, CD_Trigger_flag(0)
+, Mulcast_Trigger_flag(0)
 , channel_busy_flag(0)
 , playback_start_flag(0)
 , stop_send_rtp_flag(0)
 , channel_applied_flag(0)
 , audio_codec_err_counter(0)
-, slave_busy(0)
+, slave_busy_flag(0)
 , timeout_flag(0)
 , Configurable_delay_time(0)
 , capture_buffer(NULL)
@@ -22,6 +22,7 @@ MyRepeater::MyRepeater()
 {
 	fprintf(stderr, "\n/***********************V2.1.0.1******************************/\n");
 	fprintf(stderr, "\n/****************Repeater main() is running*******************/\n");
+	
 	pThis = this;
 	//The 4-byte APP Firmware Version number uses a Major Number to track the major changes,
 	// Minor Number to track minor changes and Product ID Number to differentiate the product line.
@@ -31,7 +32,28 @@ MyRepeater::MyRepeater()
 	0x0003	...
 	...		...
 
+
+
 	*/
+	m_PleaseStopRepeater = false;
+
+	my_baseinfo = NULL;
+	my_gpio_app = NULL;
+	my_alsa = NULL;
+	my_recvrtp = NULL;
+	my_speex = NULL;
+	proto = NULL;
+
+	CD_trigger_cond = NULL;
+	mulcast_poll_cond = NULL;
+	send_rtp_cond = NULL;
+	playback_cond = NULL;
+
+	flag_mutex = NULL;
+	playback_start_flag_mutex = NULL;
+	map_mutex = NULL;
+
+	fdset = NULL;
 
 	my_baseinfo = new Monitor_Interface;
 	my_gpio_app = new GPIO_App;
@@ -40,46 +62,188 @@ MyRepeater::MyRepeater()
 	my_speex = new Myspeex;
 	//my_rtp = new Myrtp;
 
-	//init mutex
-	pthread_mutex_init(&CD_cond_mutex, NULL);
-	pthread_mutex_init(&poll_cond_mutex, NULL);
-	pthread_mutex_init(&flag_mutex, NULL);
-	pthread_mutex_init(&playback_start_flag_mutex, NULL);
-	pthread_mutex_init(&map_mutex, NULL);
-	pthread_mutex_init(&send_rtp_cond_mutex, NULL);
-	//pthread_mutex_init(&playback_cond_mutex, NULL);
-	
+	////init mutex
+	//pthread_mutex_init(&CD_cond_mutex, NULL);
+	//pthread_mutex_init(&poll_cond_mutex, NULL);
+	//pthread_mutex_init(&flag_mutex, NULL);
+	//pthread_mutex_init(&playback_start_flag_mutex, NULL);
+	//pthread_mutex_init(&map_mutex, NULL);
+	//pthread_mutex_init(&send_rtp_cond_mutex, NULL);
+	////pthread_mutex_init(&playback_cond_mutex, NULL);
+	//
 
-	//init cond
-	pthread_cond_init(&CD_trigger_cond, NULL);
-	pthread_cond_init(&mulcast_poll_cond, NULL);
-	pthread_cond_init(&send_rtp_cond, NULL);
-	pthread_cond_init(&playback_cond, NULL);
+	////init cond
+	//pthread_cond_init(&CD_trigger_cond, NULL);
+	//pthread_cond_init(&mulcast_poll_cond, NULL);
+	//pthread_cond_init(&send_rtp_cond, NULL);
+	//pthread_cond_init(&playback_cond, NULL);
 
-	pthread_attr_init(&attr1);
-	pthread_attr_init(&attr2);
-	pthread_attr_init(&attr3);
-	pthread_attr_init(&attr4);
-
+	//pthread_attr_init(&attr1);
+	//pthread_attr_init(&attr2);
+	//pthread_attr_init(&attr3);
+	//pthread_attr_init(&attr4);
+	fprintf(stderr, "New: Repeater\n");
 }
 
 MyRepeater::~MyRepeater()
 {
 	
-	pthread_cancel(id_CDpoll);
+	/*pthread_cancel(id_CDpoll);
 	pthread_cancel(id_rtppoll);
 	pthread_cancel(id_rtpsend);
 	pthread_cancel(id_encode);
 	pthread_cancel(id_decode);
 	pthread_cancel(id_record);
 	pthread_cancel(id_playback);
-	pthread_cancel(id_time);
+	pthread_cancel(id_time);*/
 
 
 	//fprintf(stderr, "pthread_cancel(id_CDpoll) \n");
 	//sleep(10);
 	//fprintf(stderr, "sleep 10s \n");
 
+	//map<string, Myrtp*>::iterator it;
+	//while (sessionmap.size() > 0)
+	//{
+	//	it = sessionmap.begin();
+	//	if (it->second)
+	//	{
+	//		delete it->second;
+	//		it->second = NULL;
+	//	}
+	//	sessionmap.erase(it);
+	//}
+	//std::map <std::string, std::string> ::iterator at;
+	//while (base_masterMap.size() > 0)
+	//{
+	//	at = base_masterMap.begin();
+	//	base_masterMap.erase(at);
+	//}
+
+	if (my_baseinfo != NULL)delete my_baseinfo;
+	if (my_gpio_app != NULL)delete my_gpio_app;
+	if (my_alsa != NULL)delete my_alsa;
+	if (proto != NULL)delete proto;
+	if (my_recvrtp != NULL)delete my_recvrtp;
+	if (my_speex != NULL)delete my_speex;
+
+	//pthread_mutex_destroy(&CD_cond_mutex);
+	//pthread_mutex_destroy(&poll_cond_mutex);
+	//pthread_mutex_destroy(&flag_mutex);
+	//pthread_mutex_destroy(&playback_start_flag_mutex);
+	//pthread_mutex_destroy(&map_mutex);
+	//pthread_mutex_destroy(&send_rtp_cond_mutex);
+
+	//pthread_cond_destroy(&CD_trigger_cond);
+	//pthread_cond_destroy(&mulcast_poll_cond);
+	//pthread_cond_destroy(&send_rtp_cond);
+	//pthread_cond_destroy(&playback_cond);
+
+	//free(playback_buffer);
+	//playback_buffer = NULL;
+
+	//free(capture_buffer);
+	//capture_buffer = NULL;
+
+	//free(fdset);
+	//fdset = NULL;
+
+	//pthread_attr_destroy(&attr1);
+	//pthread_attr_destroy(&attr2);
+	//pthread_attr_destroy(&attr3);
+	//pthread_attr_destroy(&attr4);
+
+	fprintf(stderr, "Destory: Repeater\n");
+
+}
+
+void MyRepeater::Stop()
+{
+	fprintf(stderr, "release Repeater resource\n");
+	SetThreadExitFlag();
+
+	//delete pthreads
+	if (cd_poll_thread_p != NULL)
+	{
+		delete cd_poll_thread_p;
+		cd_poll_thread_p = NULL;
+	}
+	if (record_thread_p != NULL)
+	{
+		delete record_thread_p;
+		record_thread_p = NULL;
+	}
+	if (playback_thread_p != NULL)
+	{
+		delete playback_thread_p;
+		playback_thread_p = NULL;
+	}
+	if (rtp_poll_thread_p != NULL)
+	{
+		delete rtp_poll_thread_p;
+		rtp_poll_thread_p = NULL;
+	}
+	if (rtp_send_thread_p != NULL)
+	{
+		delete rtp_send_thread_p;
+		rtp_send_thread_p = NULL;
+	}
+	if (timer_thread_p != NULL)
+	{
+		delete timer_thread_p;
+		timer_thread_p = NULL;
+	}
+	if (encode_thread_p != NULL)
+	{
+		delete encode_thread_p;
+		encode_thread_p = NULL;
+	}
+	if (decode_thread_p != NULL)
+	{
+		delete decode_thread_p;
+		decode_thread_p = NULL;
+	}
+
+	//delete sem
+	if (CD_trigger_cond != NULL)
+	{
+		delete CD_trigger_cond;
+		CD_trigger_cond = NULL;
+	}
+	if (mulcast_poll_cond != NULL)
+	{
+		delete mulcast_poll_cond;
+		mulcast_poll_cond = NULL;
+	}
+	if (send_rtp_cond != NULL)
+	{
+		delete send_rtp_cond;
+		send_rtp_cond = NULL;
+	}
+	if (playback_cond != NULL)
+	{
+		delete playback_cond;
+		playback_cond = NULL;
+	}
+
+	//delete mutex
+	if (flag_mutex != NULL)
+	{
+		delete flag_mutex;
+		flag_mutex = NULL;
+	}
+	if (playback_start_flag_mutex != NULL)
+	{
+		delete playback_start_flag_mutex;
+		playback_start_flag_mutex = NULL;
+	}
+	if (map_mutex != NULL)
+	{
+		delete map_mutex;
+		map_mutex = NULL;
+	}
+
+	//clear map
 	map<string, Myrtp*>::iterator it;
 	while (sessionmap.size() > 0)
 	{
@@ -98,44 +262,28 @@ MyRepeater::~MyRepeater()
 		base_masterMap.erase(at);
 	}
 
-	if (my_baseinfo != NULL)delete my_baseinfo;
-	if (my_gpio_app != NULL)delete my_gpio_app;
-	if (my_alsa != NULL)delete my_alsa;
-	if (proto != NULL)delete proto;
-	if (my_recvrtp != NULL)delete my_recvrtp;
-	if (my_speex != NULL)delete my_speex;
+	if (playback_buffer != NULL)
+	{
+		free(playback_buffer);
+		playback_buffer = NULL;
 
-	pthread_mutex_destroy(&CD_cond_mutex);
-	pthread_mutex_destroy(&poll_cond_mutex);
-	pthread_mutex_destroy(&flag_mutex);
-	pthread_mutex_destroy(&playback_start_flag_mutex);
-	pthread_mutex_destroy(&map_mutex);
-	pthread_mutex_destroy(&send_rtp_cond_mutex);
+	}
 
-	pthread_cond_destroy(&CD_trigger_cond);
-	pthread_cond_destroy(&mulcast_poll_cond);
-	pthread_cond_destroy(&send_rtp_cond);
-	pthread_cond_destroy(&playback_cond);
+	if (capture_buffer != NULL)
+	{
+		free(capture_buffer);
+		capture_buffer = NULL;
+	}
 
-	free(playback_buffer);
-	playback_buffer = NULL;
+	if (fdset != NULL)
+	{
+		free(fdset);
+		fdset = NULL;
+	}
 
-	free(capture_buffer);
-	capture_buffer = NULL;
 
-	free(fdset);
-	fdset = NULL;
-
-	pthread_attr_destroy(&attr1);
-	pthread_attr_destroy(&attr2);
-	pthread_attr_destroy(&attr3);
-	pthread_attr_destroy(&attr4);
-
-	fprintf(stderr, "Exit Repeater\n");
 
 }
-
-
 void MyRepeater::Start()
 {
 
@@ -150,6 +298,7 @@ void MyRepeater::Start()
 	char tmp[50];
 	bzero(tmp, 50);
 
+	//get basic config info
 	mulcastip_str = "228.221.2.1";
 	baseip_str = my_baseinfo->get_base_ip();
 	masterip_str = my_baseinfo->get_master_ip();
@@ -173,13 +322,13 @@ void MyRepeater::Start()
 
 	repeater_task_start();
 
-	if (pthread_join(id_playback, NULL) != 0){
-		fprintf(stderr, "id_playback thread is no exit..\n");
-		exit(1);
-	}
-	fprintf(stderr, "reboot the system\n");
-	sprintf(tmp, "reboot");//restart the device
-	system(tmp);
+	//if (pthread_join(id_playback, NULL) != 0){
+	//	fprintf(stderr, "id_playback thread is no exit..\n");
+	//	exit(1);
+	//}
+	//fprintf(stderr, "reboot the system\n");
+	//sprintf(tmp, "reboot");//restart the device
+	//system(tmp);
 
 }
 
@@ -700,76 +849,125 @@ void MyRepeater::repeater_task_start()
 
 	int err = 0;
 
-	//pthread_attr_setschedpolicy(&attr1, SCHED_RR);
-	//param.sched_priority = 15;
-	//pthread_attr_setschedparam(&attr1, &param);
-	//pthread_attr_setinheritsched(&attr1, PTHREAD_EXPLICIT_SCHED);//要使优先级其作用必须要有这句话
+	////pthread_attr_setschedpolicy(&attr1, SCHED_RR);
+	////param.sched_priority = 15;
+	////pthread_attr_setschedparam(&attr1, &param);
+	////pthread_attr_setinheritsched(&attr1, PTHREAD_EXPLICIT_SCHED);//要使优先级其作用必须要有这句话
 
-	//audio_record_pthread
-	err = pthread_create(&id_record, NULL, RecordThread, this);
-	if (err != 0){
-		fprintf(stderr, "audio_record_pthread  create fail...\n");
-	}
+	////audio_record_pthread
+	//err = pthread_create(&id_record, NULL, RecordThread, this);
+	//if (err != 0){
+	//	fprintf(stderr, "audio_record_pthread  create fail...\n");
+	//}
 
-	//param.sched_priority = 14;
-	//pthread_attr_setschedpolicy(&attr2, SCHED_RR);
-	//pthread_attr_setschedparam(&attr2, &param);
-	//pthread_attr_setinheritsched(&attr2, PTHREAD_EXPLICIT_SCHED);//要使优先级其作用必须要有这句话
-	////audio_playback_pthread
-	err = pthread_create(&id_playback, NULL, PlaybackThread, this);
-	if (err != 0){
-		fprintf(stderr, "audio_playback_pthread  create fail...\n");
-	}
+	////param.sched_priority = 14;
+	////pthread_attr_setschedpolicy(&attr2, SCHED_RR);
+	////pthread_attr_setschedparam(&attr2, &param);
+	////pthread_attr_setinheritsched(&attr2, PTHREAD_EXPLICIT_SCHED);//要使优先级其作用必须要有这句话
+	//////audio_playback_pthread
+	//err = pthread_create(&id_playback, NULL, PlaybackThread, this);
+	//if (err != 0){
+	//	fprintf(stderr, "audio_playback_pthread  create fail...\n");
+	//}
 
 
-	//mulcastport_poll_pthread
-	err = pthread_create(&id_rtppoll, NULL, MulcastPortPollThread, this);
-	if (err != 0){
-		fprintf(stderr, "mulcastport_poll_pthread  create fail...\n");
-	}
+	////mulcastport_poll_pthread
+	//err = pthread_create(&id_rtppoll, NULL, MulcastPortPollThread, this);
+	//if (err != 0){
+	//	fprintf(stderr, "mulcastport_poll_pthread  create fail...\n");
+	//}
 
-	//rtp_send_pthread
-	err = pthread_create(&id_rtpsend, NULL, RTPsendThread, this);
-	if (err != 0){
-		fprintf(stderr, "rtp_send_pthread  create fail...\n");
-	}
+	////rtp_send_pthread
+	//err = pthread_create(&id_rtpsend, NULL, RTPsendThread, this);
+	//if (err != 0){
+	//	fprintf(stderr, "rtp_send_pthread  create fail...\n");
+	//}
 
-	param.sched_priority = 16;
-	pthread_attr_setschedpolicy(&attr3, SCHED_RR);
-	pthread_attr_setschedparam(&attr3, &param);
-	pthread_attr_setinheritsched(&attr3, PTHREAD_EXPLICIT_SCHED);//要使优先级其作用必须要有这句话
-	//time_interrupt_thread
-	err = pthread_create(&id_time, &attr3, TimePollThread, this);
-	if (err != 0){
-		fprintf(stderr, "TimePollThread  create fail...\n");
-	}
+	//param.sched_priority = 16;
+	//pthread_attr_setschedpolicy(&attr3, SCHED_RR);
+	//pthread_attr_setschedparam(&attr3, &param);
+	//pthread_attr_setinheritsched(&attr3, PTHREAD_EXPLICIT_SCHED);//要使优先级其作用必须要有这句话
+	////time_interrupt_thread
+	//err = pthread_create(&id_time, &attr3, TimePollThread, this);
+	//if (err != 0){
+	//	fprintf(stderr, "TimePollThread  create fail...\n");
+	//}
 
-	//endoe_thread
-	err = pthread_create(&id_encode, NULL, EncodeThread, this);
-	if (err != 0){
-		fprintf(stderr, "EncodeThread  create fail...\n");
-	}
+	////endoe_thread
+	//err = pthread_create(&id_encode, NULL, EncodeThread, this);
+	//if (err != 0){
+	//	fprintf(stderr, "EncodeThread  create fail...\n");
+	//}
 
-	//decode_thread
-	err = pthread_create(&id_decode, NULL, DecodeThread, this);
-	if (err != 0){
-		fprintf(stderr, "DecodeThread  create fail...\n");
-	}
+	////decode_thread
+	//err = pthread_create(&id_decode, NULL, DecodeThread, this);
+	//if (err != 0){
+	//	fprintf(stderr, "DecodeThread  create fail...\n");
+	//}
 
-	param.sched_priority = 17;
-	pthread_attr_setschedpolicy(&attr4, SCHED_RR);
-	pthread_attr_setschedparam(&attr4, &param);
-	pthread_attr_setinheritsched(&attr4, PTHREAD_EXPLICIT_SCHED);//要使优先级其作用必须要有这句话
-	//CD_poll_thread
-	err = pthread_create(&id_CDpoll, &attr4, CDPollThread, this);
-	if (err != 0){
+	//param.sched_priority = 17;
+	//pthread_attr_setschedpolicy(&attr4, SCHED_RR);
+	//pthread_attr_setschedparam(&attr4, &param);
+	//pthread_attr_setinheritsched(&attr4, PTHREAD_EXPLICIT_SCHED);//要使优先级其作用必须要有这句话
+	////CD_poll_thread
+	//err = pthread_create(&id_CDpoll, &attr4, CDPollThread, this);
+	//if (err != 0){
+	//	fprintf(stderr, "CD_poll_thread  create fail...\n");
+	//}
+
+	cd_poll_thread_p = new MyCreateThread(CDPollThread, this);
+	if (cd_poll_thread_p == NULL)
+	{
 		fprintf(stderr, "CD_poll_thread  create fail...\n");
 	}
+
+	record_thread_p = new MyCreateThread(RecordThread, this);
+	if (record_thread_p == NULL)
+	{
+		fprintf(stderr, "record_thread_p  create fail...\n");
+	}
+
+	playback_thread_p = new MyCreateThread(PlaybackThread, this);
+	if (playback_thread_p == NULL)
+	{
+		fprintf(stderr, "playback_thread_p  create fail...\n");
+	}
+
+	rtp_poll_thread_p = new MyCreateThread(MulcastPortPollThread, this);
+	if (rtp_poll_thread_p == NULL)
+	{
+		fprintf(stderr, "rtp_poll_thread_p  create fail...\n");
+	}
+
+	rtp_send_thread_p = new MyCreateThread(RTPsendThread, this);
+	if (rtp_send_thread_p == NULL)
+	{
+		fprintf(stderr, "rtp_send_thread_p  create fail...\n");
+	}
+
+	timer_thread_p = new MyCreateThread(TimePollThread, this);
+	if (timer_thread_p == NULL)
+	{
+		fprintf(stderr, "timer_thread_p  create fail...\n");
+	}
+
+	encode_thread_p = new MyCreateThread(EncodeThread, this);
+	if (encode_thread_p == NULL)
+	{
+		fprintf(stderr, "encode_thread_p  create fail...\n");
+	}
+
+	decode_thread_p = new MyCreateThread(DecodeThread, this);
+	if (decode_thread_p == NULL)
+	{
+		fprintf(stderr, "decode_thread_p  create fail...\n");
+	}
+
 
 
 	fprintf(stderr, "start to pthread...\n");
 	fprintf(stderr, "\r\n$/***********************************/&\r\n");
-	sleep(1);
+	//sleep(1);
 	//led_thread
 	//err = pthread_create(&id_led, NULL, LedIndicatorThread, this);
 	//if (err != 0){
