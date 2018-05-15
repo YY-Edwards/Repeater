@@ -574,7 +574,7 @@ void MyRepeater::DecodeThreadFunc()
 			//usleep(30000);//30ms
 			//fprintf(stderr, "play Queue is empty\n");
 			//my_alsa->send_buf_playback(playback_buffer);;
-			continue;
+			//continue;
 		}
 		else{
 
@@ -1250,12 +1250,20 @@ void MyRepeater::RecordThreadFunc()
 
 		//pthread_testcancel();
 		temp = m_PlayBackQueue.PushToQueue((char *)capture_buffer, size);
+		if (temp == false)
+		{
+			fprintf(stderr, "m_PlayBackQueue  PushToQueue full...\n");
+		}
 		//pthread_testcancel();
 
 		if (stop_send_rtp_flag == 0){
 
 			//temp = m_RtpSendQueue.PushToQueue((char *)capture_buffer, size);
-			m_EncodeQueue.PushToQueue((char *)capture_buffer, size);
+			temp = m_EncodeQueue.PushToQueue((char *)capture_buffer, size);
+			if (temp == false)
+			{
+				fprintf(stderr, "m_EncodeQueue PushToQueue full...\n");
+			}
 		}
 		//usleep(1500);//1.5ms
 		//fprintf(stderr, "record_run\n");
@@ -1315,7 +1323,7 @@ void MyRepeater::EncodeThreadFunc()
 			//fprintf(stderr, "Encode Time is :%ld s,%ld us\n", (enc_end.tv_sec - enc_start.tv_sec), (enc_end.tv_usec - enc_start.tv_usec));
 		}
 		else if (temp > 0){//Queue empty
-			continue;
+			//continue;
 		}
 		else{
 
@@ -1389,7 +1397,7 @@ void MyRepeater::PlaybackThreadFunc()
 				//usleep(30000);//30ms
 				//fprintf(stderr, "play Queue is empty\n");
 				//my_alsa->send_buf_playback(playback_buffer);;
-				continue;		
+				//continue;		
 			}
 			else{
 
