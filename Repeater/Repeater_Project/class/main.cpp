@@ -3,19 +3,21 @@
 *
 * Created: 2016/12/20
 * Author: EDWARDS
+* Modify: 2018/05/15
 */
 #include "MyRepeater.h"
-MyRepeater *my_repeater = new MyRepeater;
+
+int exit_flag = 0;
 
 void signal_handler(int signo)
 {
 	fprintf(stderr, "\nHave caught sig N.O. %d\n", signo);
 
-	signal(signo, SIG_DFL);
-
-	delete my_repeater;
-
-	exit(0);
+	// Reinstantiate signal handler
+	signal(signo, signal_handler);
+	{
+		exit_flag = sig_num;
+	}
 
 }
 
@@ -25,9 +27,21 @@ int main(void)
 	signal(SIGTERM, signal_handler);
 	signal(SIGABRT, signal_handler);
 
-	my_repeater->Start();
+	MyRepeater *my_repeater = new MyRepeater;
 
-	delete my_repeater;
+	my_repeater->Start();
+	for (;;)
+	{
+		if (exit_flag != 0)
+		{
+			delete my_repeater;
+		}
+		else
+		{
+			usleep(200 * 1000);
+		}
+
+	}
 
 	return 0;
 	
