@@ -1222,7 +1222,7 @@ void MyRepeater::RecordThreadFunc()
 	int err;
 	static unsigned long record_count = 0;
 	int delay_count = 0;
-	int temp = 0;
+	bool temp = false;
 	int size = 0;
 
 	size = my_alsa->get_record_period_size();
