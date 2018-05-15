@@ -373,7 +373,6 @@ void AudioAlsa::get_record_buf(void *buff)
 			if ((err = snd_pcm_prepare(capture_handle)) < 0){
 				fprintf(stderr, "cannot prepare audio interface for  use (%s) \n", snd_strerror(err));
 			}
-			fprintf(stderr, "debug-1 \r\n");
 		}
 		else if (err == -EBADFD){
 			fprintf(stderr, "PCM is not in the right state (%s)\n", snd_strerror(err));

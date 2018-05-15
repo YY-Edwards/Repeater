@@ -139,7 +139,7 @@ int32_t DynFifoQueue::TakeFromDynQueue(void *packet, unsigned int& len, int wait
 
 
 FifoQueue::FifoQueue()
-:fifo_counter(0)
+:fifo_index(0)
 , queuelock(NULL)
 , queuesem(NULL)
 {
@@ -201,12 +201,12 @@ bool FifoQueue::PushToQueue(void *packet, int len)
 	//memcpy(&fifobuff[fifo_counter][0], packet, len);
 	//m_list.push_back(&fifobuff[fifo_counter][0]);//将一个数据包地址插入链表尾
 
-	memcpy(&fifobuff[fifo_counter].data, packet, len);
-	fifobuff[fifo_counter].len = len;
-	m_list.push_back(&fifobuff[fifo_counter]);//将一个结构体数据地址插入链表尾
-	fifo_counter++;
-	if (fifo_counter > 19){
-		fifo_counter = 0;
+	memcpy(&fifobuff[fifo_index].data, packet, len);
+	fifobuff[fifo_index].len = len;
+	m_list.push_back(&fifobuff[fifo_index]);//将一个结构体数据地址插入链表尾
+	fifo_index++;
+	if (fifo_index >= FIFODEEP){
+		fifo_index = 0;
 	}
 
 	queuelock->Unlock();

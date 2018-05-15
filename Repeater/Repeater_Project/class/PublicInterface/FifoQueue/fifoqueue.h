@@ -81,7 +81,7 @@ class FifoQueue
 
 		std::list<fifoqueue_t *>  	m_list;
 		fifoqueue_t fifobuff[FIFODEEP];
-		volatile  uint32_t fifo_counter;
+		volatile  uint32_t fifo_index;
 		ILock	*queuelock;
 		ISem	*queuesem;
 

@@ -1032,13 +1032,13 @@ void MyRepeater::LedIndicatorThreadFunc()
 		flag = i&0x01;
 		sprintf(tmp,"echo %d > /sys/class/leds/d19/brightness",flag);
 		system(tmp);
-		usleep(20000);
+		usleep(30000);
 		sprintf(tmp, "echo 00 > /sys/class/leds/d19/brightness", flag);
 		system(tmp);
-		usleep(20000);
+		usleep(32000);
 		sprintf(tmp, "echo %d > /sys/class/leds/d19/brightness", flag);
 		system(tmp);
-		usleep(20000);
+		usleep(27000);
 		sprintf(tmp, "echo 00 > /sys/class/leds/d19/brightness", flag);
 		system(tmp);
 
@@ -1265,7 +1265,7 @@ void MyRepeater::RecordThreadFunc()
 				fprintf(stderr, "m_EncodeQueue PushToQueue full...\n");
 			}
 		}
-		//usleep(1500);//1.5ms
+		usleep(1500);//1.5ms
 		//fprintf(stderr, "record_run\n");
 
 	}
@@ -1391,7 +1391,7 @@ void MyRepeater::PlaybackThreadFunc()
 					s_counter++;
 					fprintf(stderr, " local-playback 139p, tip:%d\n", s_counter);
 				}
-				//usleep(1500);//1.5ms
+				usleep(1500);//1.5ms
 			}
 			else if (temp > 0){//Queue empty
 				//usleep(30000);//30ms
