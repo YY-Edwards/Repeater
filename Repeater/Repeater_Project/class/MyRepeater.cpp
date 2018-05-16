@@ -1377,14 +1377,16 @@ void MyRepeater::PlaybackThreadFunc()
 			/*pthread_testcancel();
 			temp = m_PlayBackQueue.TakeFromQueue((char *)playback_buffer, length);
 			pthread_testcancel();*/
-			temp = m_PlayBackQueue.TakeFromQueue((char *)playback_buffer, length, 20);
+	
+			temp = m_PlayBackQueue.TakeFromQueue((char *)playback_buffer, length);
+		
 			if (temp == 0){
-				err = my_alsa->send_buf_playback(playback_buffer);;
+				err = my_alsa->send_buf_playback(playback_buffer);
 				if (err == -EPIPE){
 					audio_codec_err_counter++;
 				}
+				
 				bzero(playback_buffer, length);
-
 				play_counter++;
 				if (play_counter > 139){
 					play_counter = 0;

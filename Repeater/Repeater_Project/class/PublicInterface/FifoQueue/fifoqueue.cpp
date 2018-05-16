@@ -251,3 +251,102 @@ int32_t FifoQueue::TakeFromQueue(void *packet, int& len, int waittime)
 
 
 
+
+
+
+
+RingQueue::RingQueue()
+{
+	queue_head = 0;
+	queue_tail = 0;
+	for (int i = 0; i < FIFODEEP; i++){
+		memset(&(ringqueue[i].data), 0x00, DATADEEP);
+		memset(&(ringqueue[i].len), 0x00, sizeof(uint8_t));
+	}
+	queuelock = new Mutex((const char *)"queuelocker");
+
+}
+
+RingQueue::~RingQueue()
+{
+	ClearQueue();//Çå¿Õ¶ÓÁÐ
+	if (queuelock != NULL)
+	{
+		delete queuelock;
+		queuelock = NULL;
+	}
+}
+bool RingQueue::PushToQueue(void *packet, int len)
+{
+	fifoqueue_t * ptr;
+	int next_index = 0;
+	int ret = false;
+	if (len>DATADEEP)return false;//data overout
+
+	queuelock->Lock();
+
+	ptr = (fifoqueue_t *)(&ringqueue[queue_head]);
+
+	memcpy(ptr->data, packet, len);
+	ptr->len = len;
+
+	next_index = (queue_head + 1) & (FIFODEEP - 1);
+	if (next_index != queue_tail)
+	{
+		queue_head = next_index;
+		ret = true;//okay
+	}
+	else
+	{
+		ret = false;//full
+	}
+
+	queuelock->Unlock();
+
+	return ret;
+}
+
+int32_t RingQueue::TakeFromQueue(void *packet, int& len)
+{
+	int ret = 0;
+
+	queuelock->Lock();
+
+	int snap_head = queue_head;
+	if (snap_head != queue_tail)
+	{
+		memcpy(packet, ringqueue[queue_tail].data, ringqueue[queue_tail].len);
+		len = ringqueue[queue_tail].len;
+		queue_tail = (queue_tail + 1) & (FIFODEEP - 1);
+		ret = 0;//success
+	}
+	else
+	{
+		ret = 1;//empty
+	}
+	queuelock->Unlock();
+
+	return  ret;
+}
+void RingQueue::ClearQueue()
+{
+	queuelock->Lock();
+	queue_tail = queue_head;
+	queuelock->Unlock();
+}
+
+bool RingQueue::QueueIsEmpty()
+{
+	if (queue_tail == queue_head)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+}
+
+
+

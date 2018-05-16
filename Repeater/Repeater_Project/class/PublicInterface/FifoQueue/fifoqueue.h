@@ -89,5 +89,28 @@ class FifoQueue
 };
 
 
+class RingQueue
+{
+
+public:
+	RingQueue();
+	~RingQueue();
+
+public:
+	bool  			PushToQueue(void *packet, int len);
+	int32_t 		TakeFromQueue(void *packet, int& len);
+
+	void			ClearQueue();
+	bool 			QueueIsEmpty();
+
+private:
+
+	fifoqueue_t ringqueue[FIFODEEP];
+	int queue_head;
+	int queue_tail;
+	ILock	*queuelock;
+};
+
+
 
 #endif

@@ -92,7 +92,8 @@ private :
 	
 
 	FifoQueue m_RtpSendQueue;
-	FifoQueue m_PlayBackQueue;
+	RingQueue m_PlayBackQueue;
+	//FifoQueue m_PlayBackQueue;
 	FifoQueue m_EncodeQueue;
 	FifoQueue m_DecodeQueue;
 
