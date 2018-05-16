@@ -550,7 +550,7 @@ void MyRepeater::DecodeThreadFunc()
 		//pthread_testcancel();
 		//temp = m_DecodeQueue.TakeFromQueueForSpeex((char *)encode_buff, nbyte);
 		//pthread_testcancel();
-		temp = m_DecodeQueue.TakeFromQueue((char *)encode_buff, nbyte, 20);//20ms
+		temp = m_DecodeQueue.TakeFromQueue((char *)encode_buff, nbyte);
 		if (temp == 0){
 
 			if (Mulcast_Trigger_flag == 0){
@@ -571,7 +571,7 @@ void MyRepeater::DecodeThreadFunc()
 
 		}
 		else if (temp > 0){//Queue empty
-			//usleep(30000);//30ms
+			usleep(20000);//20ms
 			//fprintf(stderr, "play Queue is empty\n");
 			//my_alsa->send_buf_playback(playback_buffer);;
 			//continue;
@@ -943,11 +943,11 @@ void MyRepeater::repeater_task_start()
 	//	fprintf(stderr, "CD_poll_thread  create fail...\n");
 	//}
 
-	//cd_poll_thread_p = new MyCreateThread(CDPollThread, this);
-	//if (cd_poll_thread_p == NULL)
-	//{
-	//	fprintf(stderr, "CD_poll_thread  create fail...\n");
-	//}
+	cd_poll_thread_p = new MyCreateThread(CDPollThread, this);
+	if (cd_poll_thread_p == NULL)
+	{
+		fprintf(stderr, "CD_poll_thread  create fail...\n");
+	}
 
 	record_thread_p = new MyCreateThread(RecordThread, this);
 	if (record_thread_p == NULL)
@@ -961,35 +961,35 @@ void MyRepeater::repeater_task_start()
 		fprintf(stderr, "playback_thread_p  create fail...\n");
 	}
 
-	//rtp_poll_thread_p = new MyCreateThread(MulcastPortPollThread, this);
-	//if (rtp_poll_thread_p == NULL)
-	//{
-	//	fprintf(stderr, "rtp_poll_thread_p  create fail...\n");
-	//}
+	rtp_poll_thread_p = new MyCreateThread(MulcastPortPollThread, this);
+	if (rtp_poll_thread_p == NULL)
+	{
+		fprintf(stderr, "rtp_poll_thread_p  create fail...\n");
+	}
 
-	//rtp_send_thread_p = new MyCreateThread(RTPsendThread, this);
-	//if (rtp_send_thread_p == NULL)
-	//{
-	//	fprintf(stderr, "rtp_send_thread_p  create fail...\n");
-	//}
+	rtp_send_thread_p = new MyCreateThread(RTPsendThread, this);
+	if (rtp_send_thread_p == NULL)
+	{
+		fprintf(stderr, "rtp_send_thread_p  create fail...\n");
+	}
 
-	//timer_thread_p = new MyCreateThread(TimePollThread, this);
-	//if (timer_thread_p == NULL)
-	//{
-	//	fprintf(stderr, "timer_thread_p  create fail...\n");
-	//}
+	timer_thread_p = new MyCreateThread(TimePollThread, this);
+	if (timer_thread_p == NULL)
+	{
+		fprintf(stderr, "timer_thread_p  create fail...\n");
+	}
 
-	//encode_thread_p = new MyCreateThread(EncodeThread, this);
-	//if (encode_thread_p == NULL)
-	//{
-	//	fprintf(stderr, "encode_thread_p  create fail...\n");
-	//}
+	encode_thread_p = new MyCreateThread(EncodeThread, this);
+	if (encode_thread_p == NULL)
+	{
+		fprintf(stderr, "encode_thread_p  create fail...\n");
+	}
 
-	//decode_thread_p = new MyCreateThread(DecodeThread, this);
-	//if (decode_thread_p == NULL)
-	//{
-	//	fprintf(stderr, "decode_thread_p  create fail...\n");
-	//}
+	decode_thread_p = new MyCreateThread(DecodeThread, this);
+	if (decode_thread_p == NULL)
+	{
+		fprintf(stderr, "decode_thread_p  create fail...\n");
+	}
 
 
 
@@ -1243,7 +1243,7 @@ void MyRepeater::RecordThreadFunc()
 
 		//fprintf(stderr,"record go\n");
 		//wait for CD_trigger_cond to wakeup the function:record audio
-		//Wait_Record_Event();
+		Wait_Record_Event();
 		if (m_PleaseStopRepeater)break;
 
 		my_alsa->get_record_buf(capture_buffer);
@@ -1256,16 +1256,17 @@ void MyRepeater::RecordThreadFunc()
 		}
 		//pthread_testcancel();
 
-		//if (stop_send_rtp_flag == 0){
+		if (stop_send_rtp_flag == 0){
 
-		//	//temp = m_RtpSendQueue.PushToQueue((char *)capture_buffer, size);
-		//	temp = m_EncodeQueue.PushToQueue((char *)capture_buffer, size);
-		//	if (temp == false)
-		//	{
-		//		fprintf(stderr, "m_EncodeQueue PushToQueue full...\n");
-		//	}
-		//}
-		//usleep(1500);//1.5ms
+			//temp = m_RtpSendQueue.PushToQueue((char *)capture_buffer, size);
+			temp = m_EncodeQueue.PushToQueue((char *)capture_buffer, size);
+			if (temp == false)
+			{
+				fprintf(stderr, "m_EncodeQueue PushToQueue full...\n");
+			}
+		}
+		setTimer(0, 15000);//20ms
+		//usleep(20000);//20ms
 		//fprintf(stderr, "record_run\n");
 
 	}
@@ -1310,7 +1311,7 @@ void MyRepeater::EncodeThreadFunc()
 		/*pthread_testcancel();
 		temp = m_EncodeQueue.TakeFromQueue(buff, size);
 		pthread_testcancel();*/
-		temp = m_EncodeQueue.TakeFromQueue(buff, size, 20);
+		temp = m_EncodeQueue.TakeFromQueue(buff, size);
 		if (temp == 0){
 
 			//gettimeofday(&enc_start, NULL);
@@ -1319,10 +1320,11 @@ void MyRepeater::EncodeThreadFunc()
 			m_RtpSendQueue.PushToQueue(encode_buff, nbyte);//推送到发送队列
 			bzero(buff, sizeof(buff));
 			bzero(encode_buff, sizeof(encode_buff));
-			usleep(300);//1ms
+			//usleep(300);//1ms
 			//fprintf(stderr, "Encode Time is :%ld s,%ld us\n", (enc_end.tv_sec - enc_start.tv_sec), (enc_end.tv_usec - enc_start.tv_usec));
 		}
 		else if (temp > 0){//Queue empty
+			usleep(15000);//15ms
 			//continue;
 		}
 		else{
@@ -1372,7 +1374,7 @@ void MyRepeater::PlaybackThreadFunc()
 
 	for (;;){
 
-			//Wait_Playback_Event();
+			Wait_Playback_Event();
 			if (m_PleaseStopRepeater)break;
 			/*pthread_testcancel();
 			temp = m_PlayBackQueue.TakeFromQueue((char *)playback_buffer, length);
@@ -1393,10 +1395,11 @@ void MyRepeater::PlaybackThreadFunc()
 					s_counter++;
 					fprintf(stderr, " local-playback 139p, tip:%d\n", s_counter);
 				}
-				//usleep(1500);//1.5ms
+				//usleep(20000);//20ms
 			}
 			else if (temp > 0){//Queue empty
-				//usleep(30000);//30ms
+				//setTimer(0, 20000);//20ms
+				//usleep(20000);//20ms
 				//fprintf(stderr, "play Queue is empty\n");
 				//my_alsa->send_buf_playback(playback_buffer);;
 				//continue;		
@@ -1406,7 +1409,7 @@ void MyRepeater::PlaybackThreadFunc()
 				fprintf(stderr, "m_PlayBackQueue.TakeFromQueue err : %d\n", temp);//nerver happened
 				break;
 			}
-			//fprintf(stderr, "play_run\n");
+			//setTimer(0, 1000);//5ms
 
 	}
 
@@ -1474,7 +1477,7 @@ void MyRepeater::RTPsendThreadFunc()
 		//temp = m_RtpSendQueue.TakeFromQueueForSpeex((char *)package_send_buffer, length);// 非阻塞模式
 		//pthread_testcancel();
 
-		temp = m_RtpSendQueue.TakeFromQueue((char *)package_send_buffer, length, 20);// 非阻塞模式
+		temp = m_RtpSendQueue.TakeFromQueue((char *)package_send_buffer, length);// 非阻塞模式
 		if (temp == 0){
 
 			if ((my_gpio_app->get_cd_current_value() == 1) || (CD_Trigger_flag == 0)){
@@ -1508,7 +1511,7 @@ void MyRepeater::RTPsendThreadFunc()
 		}
 		else{//Queue empty
 
-			//usleep(20000);//20ms
+			usleep(20000);//20ms
 			//fprintf(stderr, "rtp-send_run\n");
 			//fprintf(stderr, "RTP Send is empty\n");
 			//continue;

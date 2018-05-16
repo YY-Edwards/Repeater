@@ -18,8 +18,8 @@
 #include "syninterface.h"
 //#include "log.h"
 
-#define FIFODEEP  30
-#define DATADEEP  512
+#define FIFODEEP  100
+#define DATADEEP  320
 #pragma pack(push, 1)
 typedef struct{
 	char	data[DATADEEP];

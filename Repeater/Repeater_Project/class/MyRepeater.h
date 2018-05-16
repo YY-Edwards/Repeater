@@ -90,12 +90,14 @@ private :
 	////pthread_mutex_t playback_cond_mutex;
 	//pthread_cond_t playback_cond;
 	
-
-	FifoQueue m_RtpSendQueue;
+	RingQueue m_RtpSendQueue;
 	RingQueue m_PlayBackQueue;
-	//FifoQueue m_PlayBackQueue;
+	RingQueue m_EncodeQueue;
+	RingQueue m_DecodeQueue;
+	/*FifoQueue m_RtpSendQueue;
+	FifoQueue m_PlayBackQueue;
 	FifoQueue m_EncodeQueue;
-	FifoQueue m_DecodeQueue;
+	FifoQueue m_DecodeQueue;*/
 
 	//init queue
 	//AudioQueue 	m_RtpSendQueue;

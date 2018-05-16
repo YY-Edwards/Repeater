@@ -35,7 +35,7 @@
 
 
 #define MAX_BUF 60
-#define POLL_TIMEOUT (20) /* 20 milliseconds */
+#define POLL_TIMEOUT (200) /* 20 milliseconds */
 #define OUT 1
 #define IN 0
 #define HIGH_LEVEL 1
