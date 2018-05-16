@@ -1409,7 +1409,7 @@ void MyRepeater::PlaybackThreadFunc()
 				fprintf(stderr, "m_PlayBackQueue.TakeFromQueue err : %d\n", temp);//nerver happened
 				break;
 			}
-			//setTimer(0, 1000);//5ms
+			setTimer(0, 1000);//1ms
 
 	}
 
