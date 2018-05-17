@@ -565,7 +565,7 @@ void MyRepeater::DecodeThreadFunc()
 			//gettimeofday(&dec_end, NULL);
 			m_PlayBackQueue.PushToQueue((char *)decode_buff, 320);//推送到发送队列
 			//fprintf(stderr, "Decode Time is :%ld s,%ld us\n", (dec_end.tv_sec - dec_start.tv_sec), (dec_end.tv_usec - dec_start.tv_usec));
-
+			usleep(300)
 			bzero(decode_buff, sizeof(decode_buff));
 			bzero(encode_buff, sizeof(encode_buff));
 
@@ -1320,7 +1320,7 @@ void MyRepeater::EncodeThreadFunc()
 			m_RtpSendQueue.PushToQueue(encode_buff, nbyte);//推送到发送队列
 			bzero(buff, sizeof(buff));
 			bzero(encode_buff, sizeof(encode_buff));
-			//usleep(300);//1ms
+			usleep(300);//1ms
 			//fprintf(stderr, "Encode Time is :%ld s,%ld us\n", (enc_end.tv_sec - enc_start.tv_sec), (enc_end.tv_usec - enc_start.tv_usec));
 		}
 		else if (temp > 0){//Queue empty
