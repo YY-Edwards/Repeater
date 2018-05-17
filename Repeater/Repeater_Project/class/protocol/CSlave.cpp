@@ -376,9 +376,7 @@ void CSlave::RecvThreadFunc()
 				default:
 					fprintf(stderr, "opcode no support\n");
 					break;
-				}
-
-				memset(&recvBuf[0], 0, BUFLENGTH);//clear recvbuf[BUFLENGTH];
+				}			
 
 			}
 			else if ((rt.nbytes == -1) && (rt.nresult == 1))
@@ -395,6 +393,7 @@ void CSlave::RecvThreadFunc()
 			{
 
 			}
+			memset(&recvBuf[0], 0, BUFLENGTH);//clear recvbuf[BUFLENGTH];
 
 		}
 

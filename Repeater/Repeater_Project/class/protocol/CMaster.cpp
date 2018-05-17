@@ -208,62 +208,154 @@ void CMaster::RecvThreadFunc()
 	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
 
+	int temp = 0;
+	int return_value = 0;
+	transresult_t rt;
+	//创建并初始化select需要的参数(这里仅监视read)，并把sock添加到fd_set中
+	fd_set readfds;
+	struct timespec timeout;
+	timeout.tv_sec = SELECT_TIMEOUT;
+	timeout.tv_nsec = 0;
+
+	/*pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);*/
 	fprintf(stderr, "master RecvThreadFunc is running\n");
 
 	while (isRecvStatus)
 	{
-		//int  len = sizeof(struct sockaddr_in);
-		socklen_t  len = sizeof(struct sockaddr_in);
-		memset(recvBuf,0,BUFLENGTH);
-		//pthread_testcancel();
-		int ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
-		//pthread_testcancel();
-		if (-1 != ret)
+
+		FD_ZERO(&readfds);
+		FD_SET(sockfd, &readfds);
+		return_value = pselect(sockfd + 1, &readfds, NULL, NULL, &timeout, NULL);
+		if (return_value < 0)
 		{
-		
-			std::string rmtIp = inet_ntoa(rmtAddr.sin_addr);
-			switch (static_cast<char>(recvBuf[0]))
+			fprintf(stderr, "pselect Client fail\n");
+			return_value = -1;
+			break;
+		}
+		else if (return_value == 0)
+		{
+			continue;//timeout
+		}
+		else//okay data
+		{
+			rt = myudp_server->RecvFrom(&recvBuf[0], BUFLENGTH);
+			if (rt.nbytes > 0)
 			{
-			case static_cast<char>(RegisterOpcode) :
-				fprintf(stderr,"recvRegister \n");
-				Sendmap2Repeater(rmtIp);
-				Sendmap2Slave();
-				break;
-			case static_cast<char>(AliveOpcode):
-				fprintf(stderr,"recvAlive:%s\n", rmtIp.c_str());
-				m_aliveLocker->Lock();
-				isAlive = true;
-				m_aliveLocker->Unlock();
-				SendAlive2Slave(rmtIp);
-				Updatemap(rmtIp);
-				break;
-			case static_cast<char>(GetChannelStatusOpcode):
-				fprintf(stderr,"recvGetChannelStatus\n");
-				if (myCallBackFunc != NULL)
+				std::string  rmtIp = inet_ntoa(rt.remoteAddr.sin_addr);
+				switch (static_cast<char>(recvBuf[0]))
 				{
-					//fprintf(stderr,"myCallBackFunc\n");
-					if ("" == getStatusIp)
+				case static_cast<char>(RegisterOpcode) :
+					fprintf(stderr, "recvRegister \n");
+					Sendmap2Repeater(rmtIp);
+					Sendmap2Slave();
+					break;
+				case static_cast<char>(AliveOpcode) :
+					fprintf(stderr, "recvAlive:%s\n", rmtIp.c_str());
+					m_aliveLocker->Lock();
+					isAlive = true;
+					m_aliveLocker->Unlock();
+					SendAlive2Slave(rmtIp);
+					Updatemap(rmtIp);
+					break;
+				case static_cast<char>(GetChannelStatusOpcode) :
+					fprintf(stderr, "recvGetChannelStatus\n");
+					if (myCallBackFunc != NULL)
 					{
-						getStatusIp = rmtIp;
+						//fprintf(stderr,"myCallBackFunc\n");
+						if ("" == getStatusIp)
+						{
+							getStatusIp = rmtIp;
+						}
+						ResponeData r = { slavemap, rmtIp, "", GETCHANNEL, -1 };
+						onData(myCallBackFunc, GETCHANNELSTATUS, r);
 					}
-					ResponeData r = {slavemap, rmtIp,"",GETCHANNEL,-1 };
-					onData(myCallBackFunc, GETCHANNELSTATUS, r);
+					break;
+				case static_cast<char>(ReleaseChannelOpcode) :
+					fprintf(stderr, "recvReleaseChannel\n");
+					if (myCallBackFunc != NULL)
+					{
+						ResponeData r = { slavemap, "", rmtIp, RELEASECHANNNEL, -1 };
+						onData(myCallBackFunc, RELEASECHANNELSTATUS, r);
+						//SlaveEndRecorderVoice(rmtIp);
+					}
+					break;
+				default:
+					break;
 				}
-				break;
-			case static_cast<char>(ReleaseChannelOpcode):
-				fprintf(stderr,"recvReleaseChannel\n");
-				if (myCallBackFunc != NULL)
-				{
-					ResponeData r = {slavemap,"",rmtIp,RELEASECHANNNEL,-1 };
-					onData(myCallBackFunc, RELEASECHANNELSTATUS, r);
-					//SlaveEndRecorderVoice(rmtIp);
-				}
-				break;
-			default:
+			}
+			else if ((rt.nbytes == -1) && (rt.nresult == 1))
+			{
+				fprintf(stderr, "udp SocketRecv Timeout\n");
+			}
+			else if ((rt.nresult == -1))
+			{
+				fprintf(stderr, "server close socket\n");
+				return_value = -1;
 				break;
 			}
+			else
+			{
+
+			}
+
+			memset(&recvBuf[0], 0, BUFLENGTH);//clear recvbuf[BUFLENGTH];
+
 		}
-		usleep(5000);
+
+
+		////int  len = sizeof(struct sockaddr_in);
+		//socklen_t  len = sizeof(struct sockaddr_in);
+		//memset(recvBuf,0,BUFLENGTH);
+		////pthread_testcancel();
+		//int ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
+		////pthread_testcancel();
+		//if (-1 != ret)
+		//{
+		//
+		//	std::string rmtIp = inet_ntoa(rmtAddr.sin_addr);
+		//	switch (static_cast<char>(recvBuf[0]))
+		//	{
+		//	case static_cast<char>(RegisterOpcode) :
+		//		fprintf(stderr,"recvRegister \n");
+		//		Sendmap2Repeater(rmtIp);
+		//		Sendmap2Slave();
+		//		break;
+		//	case static_cast<char>(AliveOpcode):
+		//		fprintf(stderr,"recvAlive:%s\n", rmtIp.c_str());
+		//		m_aliveLocker->Lock();
+		//		isAlive = true;
+		//		m_aliveLocker->Unlock();
+		//		SendAlive2Slave(rmtIp);
+		//		Updatemap(rmtIp);
+		//		break;
+		//	case static_cast<char>(GetChannelStatusOpcode):
+		//		fprintf(stderr,"recvGetChannelStatus\n");
+		//		if (myCallBackFunc != NULL)
+		//		{
+		//			//fprintf(stderr,"myCallBackFunc\n");
+		//			if ("" == getStatusIp)
+		//			{
+		//				getStatusIp = rmtIp;
+		//			}
+		//			ResponeData r = {slavemap, rmtIp,"",GETCHANNEL,-1 };
+		//			onData(myCallBackFunc, GETCHANNELSTATUS, r);
+		//		}
+		//		break;
+		//	case static_cast<char>(ReleaseChannelOpcode):
+		//		fprintf(stderr,"recvReleaseChannel\n");
+		//		if (myCallBackFunc != NULL)
+		//		{
+		//			ResponeData r = {slavemap,"",rmtIp,RELEASECHANNNEL,-1 };
+		//			onData(myCallBackFunc, RELEASECHANNELSTATUS, r);
+		//			//SlaveEndRecorderVoice(rmtIp);
+		//		}
+		//		break;
+		//	default:
+		//		break;
+		//	}
+		//}
+		//usleep(5000);
 	}
 	fprintf(stderr, "exit:master RecvThreadFunc\n");
 }
@@ -355,35 +447,44 @@ char* CMaster::stringSplit()
 void CMaster::Sendmap2Repeater(std::string rmtIp)
 {
 	bool isHave = false;
-	std::map<std::string, std::string>::iterator it;
+	//std::map<std::string, std::string>::iterator it;
 	m_mapLocker->Lock();
-	for (it = slavemap.begin(); it != slavemap.end(); it++)
-	{
-		if (rmtIp == it->first)
-		{
-			isHave = true;
-			time_t t = time(0);
-			//tm timeinfo;
-			char tmp[64];
-			//localtime_s(&timeinfo, &t);
-			strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
-			slavemap[rmtIp] = tmp;
-			break;
-		}
-		else
-		{
-			isHave = false;
-		}
-	}
-	if (false == isHave)
-	{	time_t t = time(0);
-		//tm timeinfo;
-		char tmp[64];
-		//localtime_s(&timeinfo,&t);
-		strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
-	
-		slavemap[rmtIp] = tmp;
-	}
+
+	time_t t = time(0);
+	char tmp[64];
+	memset(tmp, 0x00, sizeof(tmp));
+	strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
+	slavemap[rmtIp] = tmp;
+
+
+	//for (it = slavemap.begin(); it != slavemap.end(); it++)
+	//{
+	//	if (rmtIp == it->first)
+	//	{
+	//		isHave = true;
+	//		time_t t = time(0);
+	//		//tm timeinfo;
+	//		char tmp[64];
+	//		//localtime_s(&timeinfo, &t);
+	//		strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
+	//		slavemap[rmtIp] = tmp;
+	//		break;
+	//	}
+	//	else
+	//	{
+	//		isHave = false;
+	//	}
+	//}
+	//if (false == isHave)
+	//{	time_t t = time(0);
+	//	//tm timeinfo;
+	//	char tmp[64];
+	//	//localtime_s(&timeinfo,&t);
+	//	strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
+	//
+	//	slavemap[rmtIp] = tmp;
+	//}
+
 	if (myCallBackFunc != NULL)
 	{
 		fprintf(stderr,"sendMap2Repeater\n");
