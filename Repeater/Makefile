@@ -7,7 +7,7 @@ C_FLAGS += -ldl -lm -lpthread -ljrtp  -lspeex -lasound -g -Wl,--as-needed
 
 objs := $(patsubst %c, %o, $(shell ls *.cpp))
 
-INC += -I /usr/share/alsa-lib/include -I /opt/linux/Examples/Repeater-test/  -I /opt/linux/speex-utils/speex-1.2rc2/include -I /usr/local/include/jrtplib3 
+INC += -I /usr/share/alsa-lib/include -I /opt/linux/Examples/Repeater-master/  -I /opt/linux/speex-utils/speex-1.2rc2/include -I /usr/local/include/jrtplib3 
 
 LIB += -L/usr/share/alsa-lib/lib/  -L/usr/local/lib/ 
 
@@ -15,7 +15,7 @@ LIB += -L/usr/share/alsa-lib/lib/  -L/usr/local/lib/
 all: $(TARGET)
 
 
-repeater: main.o fifoqueue.o syninterface.o MyRepeater.o Protocol.o CMaster.o CSlave.o Myrtp.o Monitor_Interface.o MFile.o gpio.o GPIO_App.o AudioAlsa.o myspeex.o
+repeater: main.o fifoqueue.o syninterface.o socketwrap.o MyRepeater.o Protocol.o CMaster.o CSlave.o Myrtp.o Monitor_Interface.o MFile.o gpio.o GPIO_App.o AudioAlsa.o myspeex.o
 	$(CXX) -o $@ $^ $(INC) $(LIB) $(C_FLAGS)
 
 .cpp.o:
