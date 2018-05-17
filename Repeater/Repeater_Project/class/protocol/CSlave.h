@@ -43,24 +43,36 @@ private:
 	bool isSendAlive;
 	char recvBuf[BUFLENGTH];
 	std::map<std::string, std::string> slavemap;
-	pthread_mutex_t m_mapLocker;
+
+	Mutex *m_mapLocker;
+	Mutex *m_onDataLocker;
+	Mutex *m_sendLocker;
+	Mutex *m_statusLocker;
+	Mutex *lastRecvAliveTimeLocker;
+
+	/*pthread_mutex_t m_mapLocker;
 	pthread_mutex_t m_sendLocker;
 	pthread_mutex_t m_statusLocker;
 	pthread_mutex_t m_onDataLocker;
 
 
-	pthread_mutex_t lastRecvAliveTimeLocker;
+	pthread_mutex_t lastRecvAliveTimeLocker;*/
 
 	//std::string strIp;
 	//char sendBuf[BUFLENGTH];
 	char  lastRecvAliveTime[64];
 	bool isRecvedmap;
-	sem_t sem;
+	//sem_t sem;
+	MySynSem *sem;
 	bool isGetStatus;
 
-	pthread_t id;
+
+	MyCreateThread * alive_pthread_p;
+	MyCreateThread * udp_recv_pthread_p;
+	MyCreateThread * monitor_pthread_p;
+	/*pthread_t id;
 	pthread_t aliveId;
-	pthread_t monitorId;
+	pthread_t monitorId;*/
 
 };
 

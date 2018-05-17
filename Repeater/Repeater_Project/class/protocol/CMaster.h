@@ -47,18 +47,28 @@ private:
 	bool isRecvStatus;
 	char recvBuf[BUFLENGTH];
 	std::map<std::string, std::string> slavemap;
-	pthread_mutex_t m_mapLocker;
+
+
+	Mutex *m_mapLocker;
+	Mutex *m_onDataLocker;
+	Mutex *m_sendLocker;
+	Mutex *m_aliveLocker;
+
+	/*pthread_mutex_t m_mapLocker;
 	pthread_mutex_t m_onDataLocker;
 	pthread_mutex_t m_sendLocker;
-	pthread_mutex_t m_aliveLocker;
+	pthread_mutex_t m_aliveLocker;*/
 	//std::string strIp;
 	//char sendBuf[BUFLENGTH];
 	std::string getStatusIp;
 	bool isAlive;
 	
 
-	pthread_t id;
-	pthread_t aliveId;
+	MyCreateThread * alive_pthread_p;
+	MyCreateThread * udp_recv_pthread_p;
+
+	/*pthread_t id;
+	pthread_t aliveId;*/
 	
 };
 

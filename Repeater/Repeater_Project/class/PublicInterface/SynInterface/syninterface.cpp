@@ -149,7 +149,14 @@ int MySynSem::SemWait(int waittime)
 	int ret = 0;
 
 #ifdef WIN32
-	ret = WaitForSingleObject(m_sem, waittime);//等待信号量触发,waittime:/ms
+	int wait_time = 0;
+	if (0 == waittime)
+		wait_time = INFINITE;
+	else
+	{
+		wait_time = waittime;
+	}
+	ret = WaitForSingleObject(m_sem, wait_time);//等待信号量触发,waittime:/ms
 	if ((ret == WAIT_ABANDONED) || (ret == WAIT_FAILED))
 	{
 		ret = -1;
@@ -159,12 +166,19 @@ int MySynSem::SemWait(int waittime)
 	struct timeval now;
 	struct timespec outtime;
 
-	gettimeofday(&now, NULL);
-	timeraddMS(&now, waittime);//ms级别
-	outtime.tv_sec = now.tv_sec;
-	outtime.tv_nsec = now.tv_usec * 1000;
-	while ((ret = sem_timedwait(&m_sem, &outtime)) != 0 && errno == EINTR)//linux 下暂时未测试其效果
-		continue;
+	if(0 != waittime)
+	{
+		gettimeofday(&now, NULL);
+		timeraddMS(&now, waittime);//ms级别
+		outtime.tv_sec = now.tv_sec;
+		outtime.tv_nsec = now.tv_usec * 1000;
+		while ((ret = sem_timedwait(&m_sem, &outtime)) != 0 && errno == EINTR)//linux 下暂时未测试其效果
+			continue;
+	}
+	else
+	{
+		ret = sem_wait(&m_sem);//阻塞
+	}
 
 	if (ret != 0)
 	{
@@ -236,6 +250,10 @@ int MySynCond::CondWait(int waittime)
 	int wait_time = 0;
 	if (0 == waittime)
 		 wait_time = INFINITE;
+	else
+	{
+		wait_time = waittime;
+	}
 
 	ret = WaitForSingleObject(m_cond, wait_time);//等待信号量触发,waittime:/ms
 	if ((ret == WAIT_ABANDONED) || (ret == WAIT_FAILED))

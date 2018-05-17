@@ -15,21 +15,52 @@ CMaster::CMaster()
 	getStatusIp = "";
 	//memset(sendBuf, 0, BUFLENGTH);
 	//m_mapLocker = PTHREAD_MUTEX_INITIALIZER;
-	pthread_mutex_init(&m_mapLocker, NULL);
+	/*pthread_mutex_init(&m_mapLocker, NULL);
 	pthread_mutex_init(&m_onDataLocker, NULL);
 	pthread_mutex_init(&m_sendLocker, NULL);
-	pthread_mutex_init(&m_aliveLocker, NULL);
+	pthread_mutex_init(&m_aliveLocker, NULL);*/
+	m_mapLocker = new Mutex("m_mapLocker");
+	m_onDataLocker = new Mutex("m_onDataLocker");
+	m_sendLocker = new Mutex("m_sendLocker");
+	m_aliveLocker = new Mutex("m_aliveLocker");
+	alive_pthread_p = NULL;
+	udp_recv_pthread_p = NULL;
+
 }
 
 CMaster::~CMaster()
 {
-	pthread_mutex_destroy(&m_mapLocker);
-	pthread_mutex_destroy(&m_onDataLocker);
-	pthread_mutex_destroy(&m_sendLocker);
-	pthread_mutex_destroy(&m_aliveLocker);
+	if (m_mapLocker != NULL)
+	{
+		delete m_mapLocker;
+		m_mapLocker = NULL;
+	}
 
-	pthread_cancel(id);
-	pthread_cancel(aliveId);
+	if (m_onDataLocker != NULL)
+	{
+		delete m_onDataLocker;
+		m_onDataLocker = NULL;
+	}
+
+	if (m_sendLocker != NULL)
+	{
+		delete m_sendLocker;
+		m_sendLocker = NULL;
+	}
+
+	if (m_aliveLocker != NULL)
+	{
+		delete m_aliveLocker;
+		m_aliveLocker = NULL;
+	}
+
+	//pthread_mutex_destroy(&m_mapLocker);
+	//pthread_mutex_destroy(&m_onDataLocker);
+	//pthread_mutex_destroy(&m_sendLocker);
+	//pthread_mutex_destroy(&m_aliveLocker);
+
+	//pthread_cancel(id);
+	//pthread_cancel(aliveId);
 
 
 	fprintf(stderr, "delete class CMaster\n");
@@ -85,26 +116,32 @@ bool CMaster::CloseSocket(int sockfd)
 void CMaster::CreateRecvThread()
 {
 	//pthread_t id, aliveId;
-	int  ret = pthread_create(&id, NULL, RecvThread, this);
-	int   aliveRet = pthread_create(&aliveId, NULL, MonitorAliveThread, this);
+	udp_recv_pthread_p = new MyCreateThread(RecvThread, this);
+	alive_pthread_p = new MyCreateThread(MonitorAliveThread, this);
+	if (udp_recv_pthread_p == NULL || alive_pthread_p == NULL)
+	{
+		fprintf(stderr, "Create master main thread error!\n");
+	}
+	//int  ret = pthread_create(&id, NULL, RecvThread, this);
+	//int   aliveRet = pthread_create(&aliveId, NULL, MonitorAliveThread, this);
 	//CreateThread(NULL, 0, RecvThread, this, THREAD_PRIORITY_NORMAL, NULL);
 	
-	if (ret != 0) {
-		fprintf(stderr,"Create master main thread error!\n");
-	}
-	else
-	{
-		//fprintf(stderr,"Create master main thread sucess!\n");
-	}
-	if (aliveRet != 0) {
-		fprintf(stderr,"Create monitor alive thread error!\n");
-	}
-	else
-	{
-		//fprintf(stderr,"Create monitor alive thread sucess!\n");
-	}
-	pthread_detach(id);
-	pthread_detach(aliveId);
+	//if (ret != 0) {
+	//	fprintf(stderr,"Create master main thread error!\n");
+	//}
+	//else
+	//{
+	//	//fprintf(stderr,"Create master main thread sucess!\n");
+	//}
+	//if (aliveRet != 0) {
+	//	fprintf(stderr,"Create monitor alive thread error!\n");
+	//}
+	//else
+	//{
+	//	//fprintf(stderr,"Create monitor alive thread sucess!\n");
+	//}
+	/*pthread_detach(id);
+	pthread_detach(aliveId);*/
 }
 void*  /*DWORD WINAPI*/ CMaster::RecvThread(void */*LPVOID*/ p)
 {
@@ -126,48 +163,51 @@ void*  /*DWORD WINAPI*/ CMaster::MonitorAliveThread(void */*LPVOID*/ p)
 }
 void CMaster::MonitorAliveThreadFunc()
 {
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
-
+	/*pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);*/
+	fprintf(stderr, "master MonitorAliveThreadFunc is running\n");
 	while (isRecvStatus)
 	{
-		pthread_mutex_lock(&m_aliveLocker);
+		m_aliveLocker->Lock();
 		isAlive = false;
-		pthread_mutex_unlock(&m_aliveLocker);
+		m_aliveLocker->Unlock();
 
-		pthread_testcancel();
+		//pthread_testcancel();
 		sleep(60);
-		pthread_testcancel();
+		//pthread_testcancel();
 
-		pthread_mutex_lock(&m_aliveLocker);
+		m_aliveLocker->Lock();
 		if (!isAlive)
 		{
-			pthread_mutex_lock(&m_mapLocker);
+			m_mapLocker->Lock();
 			slavemap.clear();
 			if (myCallBackFunc != NULL)
 			{
 				ResponeData r = { slavemap, "", "", INVALIDCHANNEL };
 				onData(myCallBackFunc, SLAVEMAP, r);
 			}
-			pthread_mutex_unlock(&m_mapLocker);
+			m_mapLocker->Unlock();
 		}
-		pthread_mutex_unlock(&m_aliveLocker);
+		m_aliveLocker->Unlock();
 
 	}
+	fprintf(stderr, "exit:master MonitorAliveThreadFunc\n");
 }
 void CMaster::RecvThreadFunc()
 {
-	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+	//pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+	//pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);
+
+	fprintf(stderr, "master RecvThreadFunc is running\n");
 
 	while (isRecvStatus)
 	{
 		//int  len = sizeof(struct sockaddr_in);
 		socklen_t  len = sizeof(struct sockaddr_in);
 		memset(recvBuf,0,BUFLENGTH);
-		pthread_testcancel();
+		//pthread_testcancel();
 		int ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
-		pthread_testcancel();
+		//pthread_testcancel();
 		if (-1 != ret)
 		{
 		
@@ -181,9 +221,9 @@ void CMaster::RecvThreadFunc()
 				break;
 			case static_cast<char>(AliveOpcode):
 				fprintf(stderr,"recvAlive:%s\n", rmtIp.c_str());
-				pthread_mutex_lock(&m_aliveLocker);
+				m_aliveLocker->Lock();
 				isAlive = true;
-				pthread_mutex_unlock(&m_aliveLocker);
+				m_aliveLocker->Unlock();
 				SendAlive2Slave(rmtIp);
 				Updatemap(rmtIp);
 				break;
@@ -215,6 +255,7 @@ void CMaster::RecvThreadFunc()
 		}
 		usleep(5000);
 	}
+	fprintf(stderr, "exit:master RecvThreadFunc\n");
 }
 
 void CMaster::SendAlive2Slave(std::string slaveIp)
@@ -234,7 +275,7 @@ void CMaster::SendAlive2Slave(std::string slaveIp)
 
 int CMaster::Send2Slave(char *pSendBuf,int length,std::string ip)
 {
-	pthread_mutex_lock(&m_sendLocker);
+	m_sendLocker->Lock();
 	char sendBuf[BUFLENGTH];
 	memset(sendBuf, 0, BUFLENGTH);
 	strcpy(sendBuf,pSendBuf);
@@ -252,12 +293,12 @@ int CMaster::Send2Slave(char *pSendBuf,int length,std::string ip)
 	{
 		//fprintf(stderr,"sendSucess\n");
 	}
-	pthread_mutex_unlock(&m_sendLocker);
+	m_sendLocker->Unlock();
 	return len;
 }
 void  CMaster::onData(void(*func)(int, ResponeData), int command, ResponeData data)
 {
-	pthread_mutex_lock(&m_onDataLocker);
+	m_onDataLocker->Lock();
 	try
 	{
 		func(command, data);
@@ -266,7 +307,7 @@ void  CMaster::onData(void(*func)(int, ResponeData), int command, ResponeData da
 	{
 
 	}
-	pthread_mutex_unlock(&m_onDataLocker);
+	m_onDataLocker->Unlock();
 }
 void CMaster::SetCallBackFunc(void(*callBackFunc)(int, ResponeData))
 {
@@ -305,7 +346,7 @@ void CMaster::Sendmap2Repeater(std::string rmtIp)
 {
 	bool isHave = false;
 	std::map<std::string, std::string>::iterator it;
-	pthread_mutex_lock(&m_mapLocker);
+	m_mapLocker->Lock();
 	for (it = slavemap.begin(); it != slavemap.end(); it++)
 	{
 		if (rmtIp == it->first)
@@ -340,11 +381,11 @@ void CMaster::Sendmap2Repeater(std::string rmtIp)
 		onData(myCallBackFunc, SLAVEMAP, r);
 		
 	}
-	pthread_mutex_unlock(&m_mapLocker);
+	m_mapLocker->Unlock();
 }
 void CMaster::Updatemap(std::string rmtIp)
 {
-	pthread_mutex_lock(&m_mapLocker);
+	m_mapLocker->Lock();
 	std::map<std::string, std::string>::iterator it;
 	bool isHave = false;
 	time_t t = time(0);
@@ -369,9 +410,9 @@ void CMaster::Updatemap(std::string rmtIp)
 			
 			 fprintf(stderr,"updateMap2:%s\n", (it->first).c_str());
 			 slavemap.erase(it++);
-			 pthread_mutex_unlock(&m_mapLocker);
+			 m_mapLocker->Unlock();
 			 Sendmap2Slave();
-			 pthread_mutex_lock(&m_mapLocker);
+			 m_mapLocker->Lock();
 			 if (myCallBackFunc != NULL)
 			 {
 				 ResponeData r = { slavemap,"","",INVALIDCHANNEL };
@@ -407,14 +448,14 @@ void CMaster::Updatemap(std::string rmtIp)
 			ResponeData r = { slavemap,"","",INVALIDCHANNEL };
 			onData(myCallBackFunc, SLAVEMAP, r);
 		}
-		pthread_mutex_unlock(&m_mapLocker);
+		m_mapLocker->Unlock();
 		Sendmap2Slave();
-		pthread_mutex_lock(&m_mapLocker);
+		m_mapLocker->Lock();
 
 
 
 	}
-	pthread_mutex_unlock(&m_mapLocker);
+	m_mapLocker->Unlock();
 	
 }
 time_t CMaster::convert_string_to_time_t(const std::string & time_string)
@@ -458,7 +499,7 @@ void CMaster::Sendmap2Slave()
 	sendBuf[0] = static_cast<char>(mapOpcode);
 	sendBuf[1] = 0;
 	std::map<std::string, std::string>::iterator it;
-	pthread_mutex_lock(&m_mapLocker);
+	m_mapLocker->Lock();
 	for (it = slavemap.begin(); it != slavemap.end(); it++)
 	{
 		sendBuf[1]++;
@@ -476,12 +517,24 @@ void CMaster::Sendmap2Slave()
 		fprintf(stderr,"sendMap2:%s\n",(it->first).c_str());
 	}
 	
-	pthread_mutex_unlock(&m_mapLocker);
+	m_mapLocker->Unlock();
 	
 }
 void CMaster::DisConnect()
 {
 	isRecvStatus = false;
+	if (udp_recv_pthread_p!=NULL)
+	{
+		delete udp_recv_pthread_p;
+		udp_recv_pthread_p = NULL;
+
+	}
+	if (alive_pthread_p != NULL)
+	{
+		delete alive_pthread_p;
+		alive_pthread_p = NULL;
+	}
+
 	if (socketOpen)
 	{
 		CloseSocket(sockfd);
@@ -490,7 +543,7 @@ void CMaster::DisConnect()
 }
 void CMaster::MasterBeginRecordVoice()
 {
-	pthread_mutex_lock(&m_mapLocker);
+	m_mapLocker->Lock();
 	char sendBuf[BUFLENGTH];
 	memset(sendBuf,0,BUFLENGTH);
 	sendBuf[0] = BeginRecorderVoiceOpcode;
@@ -506,11 +559,11 @@ void CMaster::MasterBeginRecordVoice()
 		sendBuf[5] = ip[3];
 		Send2Slave(sendBuf,6,it->first);
 	}
-	pthread_mutex_unlock(&m_mapLocker);
+	m_mapLocker->Unlock();
 }
 void CMaster::MasterEndRecorderVoice()
 {
-	pthread_mutex_lock(&m_mapLocker);
+	m_mapLocker->Lock();
 	char sendBuf[BUFLENGTH];
 	memset(sendBuf, 0, BUFLENGTH);
 	sendBuf[0] = EndRecorderVoiceOpcode;
@@ -526,11 +579,11 @@ void CMaster::MasterEndRecorderVoice()
 		sendBuf[5] = ip[3];
 		Send2Slave(sendBuf, 6, it->first);
 	}
-	pthread_mutex_unlock(&m_mapLocker);
+	m_mapLocker->Unlock();
 }
 void CMaster::SlaveBeginRecordVoice(std::string ip)
 {
-	pthread_mutex_lock(&m_mapLocker);
+	m_mapLocker->Lock();
 	char sendBuf[BUFLENGTH];
 	memset(sendBuf, 0, BUFLENGTH);
 	sendBuf[0] = BeginRecorderVoiceOpcode;
@@ -550,11 +603,11 @@ void CMaster::SlaveBeginRecordVoice(std::string ip)
 			Send2Slave(sendBuf, 6, it->first);
 		}	
 	}
-	pthread_mutex_unlock(&m_mapLocker);
+	m_mapLocker->Unlock();
 }
 void CMaster::SlaveEndRecorderVoice(std::string ip)
 {
-	pthread_mutex_lock(&m_mapLocker);
+	m_mapLocker->Lock();
 	char sendBuf[BUFLENGTH];
 	memset(sendBuf, 0, BUFLENGTH);
 	sendBuf[0] = EndRecorderVoiceOpcode;
@@ -574,7 +627,7 @@ void CMaster::SlaveEndRecorderVoice(std::string ip)
 		}
 		
 	}
-	pthread_mutex_unlock(&m_mapLocker);
+	m_mapLocker->Unlock();
 }
 
 
@@ -582,9 +635,9 @@ void CMaster::SlaveEndRecorderVoice(std::string ip)
 void  CMaster::setmap(std::map<std::string, std::string>  masterMap)
 {
 	//fprintf(stderr, "set map okay\n");
-	pthread_mutex_lock(&m_mapLocker);
+	m_mapLocker->Lock();
 	slavemap = masterMap;
-	pthread_mutex_unlock(&m_mapLocker);
+	m_mapLocker->Unlock();
 
 	//fprintf(stderr, "slavemap size is : %d\n", slavemap.size());
 }

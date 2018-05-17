@@ -161,6 +161,7 @@ void MyRepeater::Stop()
 {
 	fprintf(stderr, "release Repeater resource\n");
 	SetThreadExitFlag();
+	proto->DisConnect();//¶Ï¿ªÍ¨ÐÅ
 
 	//delete pthreads
 	if (cd_poll_thread_p != NULL)
