@@ -29,6 +29,10 @@ CSlave::CSlave()
 	sem = new MySynSem();
 	isGetStatus = false;
 
+	sockfd = INVALID_SOCKET;
+	myudp_client = NULL;
+
+
 	memset(lastRecvAliveTime, 0, 64);
 }
 
@@ -128,33 +132,58 @@ void CSlave::ReleaseChannelStatus()
 }
 bool CSlave::InitSocket()
 {
+	int ret = 0;
+
 	if (socketOpen)
 	{
-		CloseSocket(sockfd);
+		myudp_client->Reopen(true);
+		//CloseSocket(sockfd);
+	}
+	else
+	{
+		myudp_client = new CSockWrap(SOCK_DGRAM);
 	}
 	//WSADATA wsda;
 	//int ret1 = WSAStartup(MAKEWORD(1, 1), &wsda);
 	//bool bReuseraddr = false;
 	//setsockopt(sockfd, SOL_SOCKET, SO_DONTLINGER, (const char*)&bReuseraddr, sizeof(bool));/*windows*/
-	sockfd = socket(PF_INET, SOCK_DGRAM, 0);
-	if (sockfd < 0)
-	{
-		CloseSocket(sockfd);
-		return false;
-	}
-	bzero(&myAddr, sizeof(myAddr));
-	myAddr.sin_family = AF_INET;
-	myAddr.sin_port = htons(UDPPORT);
-	myAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	int ret;
-	 ret = bind(sockfd, (struct sockaddr *)&myAddr, sizeof(myAddr));
+	
+	sockfd = myudp_client->GetHandle();//获取UDP客户端描述符
+	GetAddressFrom(&myAddr, 0, UDPPORT);//本地任意IP
+
+	//注意远程服务器地址
+	GetAddressFrom(&rmtAddr, masterIp, UDPPORT);//获取远程服务器地址信息
+	myudp_client->SetAddress(&rmtAddr);//设置远程地址（sendto需要参数）
+
+	ret  = SocketBind(sockfd, &myAddr);
 	if (ret < 0)
 	{
-		CloseSocket(sockfd);
+		myudp_client->Close();
 		return false;
 	}
+	//设置sock为non-blocking
+	myudp_client->SetBlock(0);
+	
+	//sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+	//if (sockfd < 0)
+	//{
+	//	CloseSocket(sockfd);
+	//	return false;
+	//}
+	//bzero(&myAddr, sizeof(myAddr));
+	//myAddr.sin_family = AF_INET;
+	//myAddr.sin_port = htons(UDPPORT);
+	//myAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	//int ret;
+	// ret = bind(sockfd, (struct sockaddr *)&myAddr, sizeof(myAddr));
+	//if (ret < 0)
+	//{
+	//	CloseSocket(sockfd);
+	//	return false;
+	//}
+
 	socketOpen = true;
-	//fprintf(stderr,"InitSocketSucess\n");
+	fprintf(stderr,"InitSocketSucess\n");
 	CreateRecvThread();
 
 
@@ -164,7 +193,7 @@ bool CSlave::CloseSocket(int sockfd)
 {
 	if (socketOpen)
 	{
-		//close(sockfd);
+		close(sockfd);
 	}
 	return true;
 }
@@ -241,6 +270,13 @@ void*/*DWORD WINAPI */CSlave::MonitorStatusThread(void*/*LPVOID*/ p)
 void CSlave::RecvThreadFunc()
 {
 	int temp = 0; 
+	int return_value = 0;
+	transresult_t rt;
+	//创建并初始化select需要的参数(这里仅监视read)，并把sock添加到fd_set中
+	fd_set readfds;
+	struct timespec timeout;
+	timeout.tv_sec = SELECT_TIMEOUT;
+	timeout.tv_nsec = 0;
 
 	/*pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	pthread_setcanceltype(PTHREAD_CANCEL_DEFERRED, NULL);*/
@@ -248,78 +284,183 @@ void CSlave::RecvThreadFunc()
 
 	while (isRecvStatus)
 	{
-		socklen_t  len = sizeof(struct sockaddr_in);
-		//int  len = sizeof(struct sockaddr_in);
-		bzero(recvBuf, sizeof(recvBuf));
-		//pthread_testcancel();
-		int ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
-		//pthread_testcancel();
-		time_t t = time(0);
 
-		if (-1 != ret)
+		FD_ZERO(&readfds);
+		FD_SET(sockfd, &readfds);
+		return_value = pselect(sockfd + 1, &readfds, NULL, NULL, &timeout, NULL);
+		if (return_value < 0)
 		{
-			std::string  strIp = inet_ntoa(rmtAddr.sin_addr);
-			int mapCount = 0;
-			switch (static_cast<char>(recvBuf[0]))
+			fprintf(stderr, "pselect Client fail\n");
+			return_value = -1;
+			break;
+		}
+		else if (return_value == 0)
+		{
+			continue;//timeout
+		}
+		else//okay data
+		{
+			rt = myudp_client->RecvFrom(&recvBuf[0], BUFLENGTH);
+			if (rt.nbytes > 0)
 			{
-			case static_cast<char>(mapOpcode) :
-				fprintf(stderr,"recvmap\n");
-				isRecvedmap = true;
-				isSendAlive = true;   //开启心跳线程
-				mapCount = recvBuf[1];
-				Sendmap2Repeater(mapCount);
-				break;
-			case static_cast<char>(AliveOpcode):
-				//fprintf(stderr,"recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
-					fprintf(stderr, "recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
+				time_t t = time(0);
+				std::string  strIp = inet_ntoa(rt.remoteAddr.sin_addr);
+				int mapCount = 0;
+				switch (static_cast<char>(recvBuf[0]))
+				{
+				case static_cast<char>(mapOpcode) :
+					fprintf(stderr, "recvmap\n");
+					isRecvedmap = true;
+					isSendAlive = true;   //开启心跳线程
+					mapCount = recvBuf[1];
+					Sendmap2Repeater(mapCount);
+					break;
+				case static_cast<char>(AliveOpcode) :
+	
+					fprintf(stderr, "recvAlive:%s\n", strIp.c_str());
 					localtime(&t);
 					//lastRecvAliveTimeLocker->Lock();
 					strftime(lastRecvAliveTime, sizeof(lastRecvAliveTime), "%Y-%m-%d %H:%M:%S", localtime(&t));
 					//pthread_mutex_unlock(&lastRecvAliveTimeLocker);
-				break;
-			case static_cast<char>(SetChannelStatusOpcode):
-				fprintf(stderr,"recvSetChannelStatus\n");
-				m_statusLocker->Lock();
-				isGetStatus = false;
-				m_statusLocker->Unlock();
-				if (myCallBackFunc != NULL)
-				{
-					temp = (int)recvBuf[5];
+					break;
+				case static_cast<char>(SetChannelStatusOpcode) :
+					fprintf(stderr, "recvSetChannelStatus\n");
+					m_statusLocker->Lock();
+					isGetStatus = false;
+					m_statusLocker->Unlock();
+					if (myCallBackFunc != NULL)
+					{
+						temp = (int)recvBuf[5];
 
-					//fprintf(stderr,"recvBuf[5] is : %d\n", recvBuf[5]);
-					//fprintf(stderr,"temp : %d\n", temp);
+						//fprintf(stderr,"recvBuf[5] is : %d\n", recvBuf[5]);
+						//fprintf(stderr,"temp : %d\n", temp);
 
-					ResponeData r = { slavemap, "", "", SETCHANNEL, temp};
-					onData(myCallBackFunc,	SETCHANNELSTATUS, r);
-				}
-				break;
-			case static_cast<char>(ReleaseChannelOpcode):
-				/*fprintf(stderr,"recvReleaseChannel\n");
-				if (myCallBackFunc != NULL)
-				{
+						ResponeData r = { slavemap, "", "", SETCHANNEL, temp };
+						onData(myCallBackFunc, SETCHANNELSTATUS, r);
+					}
+					break;
+				case static_cast<char>(ReleaseChannelOpcode) :
+					/*fprintf(stderr,"recvReleaseChannel\n");
+					if (myCallBackFunc != NULL)
+					{
 					ResponeData r = { slavemap,"",strIp,RELEASECHANNNEL };
 					onData(myCallBackFunc, RELEASECHANNELSTATUS, r);
-				}*/
-				break;
-			case static_cast<char>(BeginRecorderVoiceOpcode) :
-				if (myCallBackFunc != NULL)
-				{
-					ResponeData r = { slavemap,"","",BEGINVOICE ,1 };
-					onData(myCallBackFunc, BEGINRECORDERVOICE, r);
+					}*/
+					break;
+				case static_cast<char>(BeginRecorderVoiceOpcode) :
+					if (myCallBackFunc != NULL)
+					{
+						ResponeData r = { slavemap, "", "", BEGINVOICE, 1 };
+						onData(myCallBackFunc, BEGINRECORDERVOICE, r);
+					}
+					break;
+				case static_cast<char>(EndRecorderVoiceOpcode) :
+					if (myCallBackFunc != NULL)
+					{
+						ResponeData r = { slavemap, "", "", ENDVOICE, 0 };
+						onData(myCallBackFunc, ENDRECORDERVOICE, r);
+					}
+					break;
+				default:
+					fprintf(stderr, "opcode no support\n");
+					break;
 				}
-				break;
-			case static_cast<char>(EndRecorderVoiceOpcode) :
-				if (myCallBackFunc != NULL)
-				{
-					ResponeData r = { slavemap,"","",ENDVOICE ,0 };
-					onData(myCallBackFunc, ENDRECORDERVOICE, r);
-				}
-				break;
-			default:
+
+				memset(&recvBuf[0], 0, BUFLENGTH);//clear recvbuf[BUFLENGTH];
+
+			}
+			else if ((rt.nbytes == -1) && (rt.nresult == 1))
+			{
+				fprintf(stderr, "udp SocketRecv Timeout\n");
+			}
+			else if ((rt.nresult == -1))
+			{
+				fprintf(stderr, "Client close socket\n");
+				return_value = -1;
 				break;
 			}
+			else
+			{
+
+			}
+
 		}
-		usleep(5000);
+
+
+
+
+		//socklen_t  len = sizeof(struct sockaddr_in);
+		////int  len = sizeof(struct sockaddr_in);
+		//bzero(recvBuf, sizeof(recvBuf));
+		////pthread_testcancel();
+		//int ret = recvfrom(sockfd, recvBuf, BUFLENGTH, 0, (struct sockaddr *)&rmtAddr, &len);
+		////pthread_testcancel();
+		//time_t t = time(0);
+
+		//if (-1 != ret)
+		//{
+		//	std::string  strIp = inet_ntoa(rmtAddr.sin_addr);
+		//	int mapCount = 0;
+		//	switch (static_cast<char>(recvBuf[0]))
+		//	{
+		//	case static_cast<char>(mapOpcode) :
+		//		fprintf(stderr,"recvmap\n");
+		//		isRecvedmap = true;
+		//		isSendAlive = true;   //开启心跳线程
+		//		mapCount = recvBuf[1];
+		//		Sendmap2Repeater(mapCount);
+		//		break;
+		//	case static_cast<char>(AliveOpcode):
+		//		//fprintf(stderr,"recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
+		//			fprintf(stderr, "recvAlive:%s\n", inet_ntoa(rmtAddr.sin_addr));
+		//			localtime(&t);
+		//			//lastRecvAliveTimeLocker->Lock();
+		//			strftime(lastRecvAliveTime, sizeof(lastRecvAliveTime), "%Y-%m-%d %H:%M:%S", localtime(&t));
+		//			//pthread_mutex_unlock(&lastRecvAliveTimeLocker);
+		//		break;
+		//	case static_cast<char>(SetChannelStatusOpcode):
+		//		fprintf(stderr,"recvSetChannelStatus\n");
+		//		m_statusLocker->Lock();
+		//		isGetStatus = false;
+		//		m_statusLocker->Unlock();
+		//		if (myCallBackFunc != NULL)
+		//		{
+		//			temp = (int)recvBuf[5];
+
+		//			//fprintf(stderr,"recvBuf[5] is : %d\n", recvBuf[5]);
+		//			//fprintf(stderr,"temp : %d\n", temp);
+
+		//			ResponeData r = { slavemap, "", "", SETCHANNEL, temp};
+		//			onData(myCallBackFunc,	SETCHANNELSTATUS, r);
+		//		}
+		//		break;
+		//	case static_cast<char>(ReleaseChannelOpcode):
+		//		/*fprintf(stderr,"recvReleaseChannel\n");
+		//		if (myCallBackFunc != NULL)
+		//		{
+		//			ResponeData r = { slavemap,"",strIp,RELEASECHANNNEL };
+		//			onData(myCallBackFunc, RELEASECHANNELSTATUS, r);
+		//		}*/
+		//		break;
+		//	case static_cast<char>(BeginRecorderVoiceOpcode) :
+		//		if (myCallBackFunc != NULL)
+		//		{
+		//			ResponeData r = { slavemap,"","",BEGINVOICE ,1 };
+		//			onData(myCallBackFunc, BEGINRECORDERVOICE, r);
+		//		}
+		//		break;
+		//	case static_cast<char>(EndRecorderVoiceOpcode) :
+		//		if (myCallBackFunc != NULL)
+		//		{
+		//			ResponeData r = { slavemap,"","",ENDVOICE ,0 };
+		//			onData(myCallBackFunc, ENDRECORDERVOICE, r);
+		//		}
+		//		break;
+		//	default:
+		//		break;
+		//	}
+		//}
+		//usleep(5000);
 	}
 	fprintf(stderr, "exit:slave RecvThreadFunc\n");
 }
@@ -613,10 +754,18 @@ void CSlave::DisConnect()
 	delete sem;
 	sem = NULL;
 
-	if (socketOpen)
+	if (sockfd != INVALID_SOCKET)
 	{
 		CloseSocket(sockfd);
+		sockfd = INVALID_SOCKET;
+		delete myudp_client;
+		myudp_client = NULL;
 	}
+
+	/*if (socketOpen)
+	{
+		CloseSocket(sockfd);
+	}*/
 }
 void  CSlave::onData(void(*func)(int, ResponeData), int command, ResponeData data)
 {

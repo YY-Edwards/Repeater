@@ -23,7 +23,7 @@
 
 
 
-#define SELECT_TIMEOUT							5       //selectµÄtimeout seconds
+#define SELECT_TIMEOUT							1       //selectµÄtimeout seconds
 
 #ifdef WIN32
 typedef  CRITICAL_SECTION GOCRITICAL_SECTION;

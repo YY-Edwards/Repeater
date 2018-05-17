@@ -33,7 +33,10 @@ private:
 	time_t convert_string_to_time_t(const std::string & time_string);
 	void SendAlive2Master();
 	
-	int sockfd;
+	//int sockfd;
+	HSocket sockfd;
+	CSockWrap *myudp_client;
+
 	struct sockaddr_in rmtAddr;
 	struct sockaddr_in myAddr;
 	bool  socketOpen;

@@ -27,6 +27,8 @@ typedef struct
 {
 	int nbytes;
 	int nresult;
+	sockaddr_in remoteAddr;
+
 } transresult_t;
 
 int InitializeSocketEnvironment();

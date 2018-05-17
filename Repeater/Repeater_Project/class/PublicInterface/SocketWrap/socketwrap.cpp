@@ -189,13 +189,15 @@ void SocketRecvFrom(HSocket hs, char *ptr, int nbytes, transresult_t &rt)
 {
 	rt.nbytes = 0;
 	rt.nresult = 0;
+	memset(&(rt.remoteAddr), 0x00, sizeof(sockaddr_in));
 	sockaddr_in remoteAddr;
 	socklen_t nAddrLen = sizeof(sockaddr_in);
 
 	if (!ptr || nbytes<1) return;
 
 	//rt.nbytes = recv(hs, ptr, nbytes, BLOCKREADWRITE); 
-	rt.nbytes = recvfrom(hs, ptr, nbytes, NONBLOCKREADWRITE, (sockaddr*)&remoteAddr, &nAddrLen);
+	//rt.nbytes = recvfrom(hs, ptr, nbytes, NONBLOCKREADWRITE, (sockaddr*)&remoteAddr, &nAddrLen);
+	rt.nbytes = recvfrom(hs, ptr, nbytes, NONBLOCKREADWRITE, (sockaddr*)&(rt.remoteAddr), &nAddrLen);
 	if (rt.nbytes>0)
 	{
 		return;
