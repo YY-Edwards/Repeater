@@ -789,7 +789,7 @@ void CSlave::SendAlive2Master()
 		¸ømaster·¢ËÍalive
 	*/
 	char sendBuf[BUFLENGTH];
-	char ip[4] = { 0 };
+	int ip[4] = { 0 };
 	memset(sendBuf, 0, BUFLENGTH);
 	sendBuf[0] = static_cast<char>(AliveOpcode);
 	sscanf(slaveIp, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]);
