@@ -37,8 +37,10 @@ private:
 	time_t convert_string_to_time_t(const std::string & time_string);
 	void SlaveBeginRecordVoice(std::string ip);
 	void SlaveEndRecorderVoice(std::string ip);
-	
-	int sockfd;
+
+	HSocket sockfd;
+	CSockWrap *myudp_server;
+	//int sockfd;
 	//SOCKET sockfd;
 	struct sockaddr_in rmtAddr;
 	struct sockaddr_in myAddr;

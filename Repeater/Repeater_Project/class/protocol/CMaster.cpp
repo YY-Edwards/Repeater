@@ -25,6 +25,8 @@ CMaster::CMaster()
 	m_aliveLocker = new Mutex("m_aliveLocker");
 	alive_pthread_p = NULL;
 	udp_recv_pthread_p = NULL;
+	sockfd = INVALID_SOCKET;
+	myudp_server = NULL;
 
 }
 
@@ -75,31 +77,39 @@ bool CMaster::Connect(const char* masterIp)
 bool CMaster::InitSocket()
 {
 
+	int ret = 0;
+
 	if (socketOpen)
 	{
-		CloseSocket(sockfd);
+		myudp_server->Reopen(true);
+		//CloseSocket(sockfd);
+	}
+	else
+	{
+		myudp_server = new CSockWrap(SOCK_DGRAM);
 	}
 	//WSADATA wsda;
-	//int ret1 = WSAStartup(MAKEWORD(1,1),&wsda);
+	//int ret1 = WSAStartup(MAKEWORD(1, 1), &wsda);
 	//bool bReuseraddr = false;
 	//setsockopt(sockfd, SOL_SOCKET, SO_DONTLINGER, (const char*)&bReuseraddr, sizeof(bool));/*windows*/
 
-	sockfd = socket(PF_INET, SOCK_DGRAM, 0);
-	if (sockfd < 0)
-	{
-		CloseSocket(sockfd);
-		return false;
-	}
-	bzero(&myAddr, sizeof(myAddr));
-	myAddr.sin_family = AF_INET;
-	myAddr.sin_port = htons(UDPPORT);
-	myAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	int ret = bind(sockfd, (struct sockaddr *)&myAddr, sizeof(myAddr));
+	sockfd = myudp_server->GetHandle();//获取UDP客户端描述符
+	GetAddressFrom(&myAddr, 0, UDPPORT);//本地任意IP
+
+	//注意远程服务器地址
+	//GetAddressFrom(&rmtAddr, masterIp, UDPPORT);//获取远程服务器地址信息
+	//myudp_server->SetAddress(&rmtAddr);//设置远程地址（sendto需要参数）
+
+	ret = SocketBind(sockfd, &myAddr);
 	if (ret < 0)
 	{
-		CloseSocket(sockfd);
+		myudp_server->Close();
 		return false;
 	}
+	//设置sock为non-blocking
+	myudp_server->SetBlock(0);
+
+
 	socketOpen = true;
 	//fprintf(stderr,"InitSocketSucess\n");
 	CreateRecvThread();
@@ -535,10 +545,18 @@ void CMaster::DisConnect()
 		alive_pthread_p = NULL;
 	}
 
-	if (socketOpen)
+	if (sockfd != INVALID_SOCKET)
 	{
 		CloseSocket(sockfd);
+		sockfd = INVALID_SOCKET;
+		delete myudp_server;
+		myudp_server = NULL;
 	}
+
+	//if (socketOpen)
+	//{
+	//	CloseSocket(sockfd);
+	//}
 
 }
 void CMaster::MasterBeginRecordVoice()

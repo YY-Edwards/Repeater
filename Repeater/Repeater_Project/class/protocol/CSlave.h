@@ -27,7 +27,7 @@ private:
 	void SendAliveThreadFunc();
 	void MonitorStatusThreadFunc();
 	int Send2Master(char* pSendBuf,int length);
-	int Send2Slave(int length,std::string ip);
+	int Send2Slave(char* pSendBuf, int length, std::string ip);
 	void stringSplit(std::string strTemp);
 	void Sendmap2Repeater(int mapCount);
 	time_t convert_string_to_time_t(const std::string & time_string);
@@ -49,7 +49,7 @@ private:
 
 	Mutex *m_mapLocker;
 	Mutex *m_onDataLocker;
-	Mutex *m_sendLocker;
+	//Mutex *m_sendLocker;
 	Mutex *m_statusLocker;
 	Mutex *lastRecvAliveTimeLocker;
 

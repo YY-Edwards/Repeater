@@ -11,7 +11,7 @@ CSlave::CSlave()
 
 	m_mapLocker = new Mutex("m_mapLocker");
 	m_onDataLocker = new Mutex("m_onDataLocker");
-	m_sendLocker = new Mutex("m_sendLocker");
+	//m_sendLocker = new Mutex("m_sendLocker");
 	m_statusLocker = new Mutex("m_statusLocker");
 	lastRecvAliveTimeLocker = new Mutex("lastRecvAliveTimeLocker");
 
@@ -59,11 +59,11 @@ CSlave::~CSlave()
 		m_onDataLocker = NULL;
 	}
 
-	if (m_sendLocker != NULL)
-	{
-		delete m_sendLocker;
-		m_sendLocker = NULL;
-	}
+	//if (m_sendLocker != NULL)
+	//{
+	//	delete m_sendLocker;
+	//	m_sendLocker = NULL;
+	//}
 
 	if (m_statusLocker != NULL)
 	{
@@ -114,8 +114,14 @@ void CSlave::GetStatus()
 	isGetStatus = true;
 	m_statusLocker->Unlock();
 	sendBuf[0] = static_cast<char>(GetChannelStatusOpcode);
-	sendBuf[3] = static_cast<char>(GETCHANNEL);
-	Send2Master(sendBuf,LENGTH-2);
+	int ip[4] = { 0 };
+	sscanf(slaveIp, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]);
+	sendBuf[1] = ip[0];
+	sendBuf[2] = ip[1];
+	sendBuf[3] = ip[2];
+	sendBuf[4] = ip[3];
+	sendBuf[5] = static_cast<char>(GETCHANNEL);
+	Send2Master(sendBuf,LENGTH+1);
 
 	sem->SemPost();
 	//sem_post(&sem);
@@ -126,7 +132,13 @@ void CSlave::ReleaseChannelStatus()
 	char sendBuf[BUFLENGTH];
 	memset(sendBuf, 0, BUFLENGTH);
 	sendBuf[0] = static_cast<char>(ReleaseChannelOpcode);
-	stringSplit(slaveIp);
+	int ip[4] = { 0 };
+	sscanf(slaveIp, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]);
+	sendBuf[1] = ip[0];
+	sendBuf[2] = ip[1];
+	sendBuf[3] = ip[2];
+	sendBuf[4] = ip[3];
+	//stringSplit(slaveIp);
 	sendBuf[5] = static_cast<char>(RELEASECHANNNEL);
 	Send2Master(sendBuf,LENGTH+1);
 }
@@ -586,46 +598,121 @@ void CSlave::MonitorStatusThreadFunc()
 }
 int CSlave::Send2Master(char* pSendBuf ,int length)
 {
-	m_sendLocker->Lock();
-	char sendBuf[BUFLENGTH];
+	//m_sendLocker->Lock();
+
+	/*char sendBuf[BUFLENGTH];
 	memset(sendBuf,0,BUFLENGTH);
-	strcpy(sendBuf,pSendBuf);
-	bzero(&rmtAddr, sizeof(rmtAddr));
-	rmtAddr.sin_family = AF_INET;
-	rmtAddr.sin_addr.s_addr = inet_addr(masterIp);
-	rmtAddr.sin_port = htons(UDPPORT);
-	int len = sendto(sockfd, sendBuf, length, 0, (struct sockaddr *)&rmtAddr, sizeof(rmtAddr));
-	if (len <= 0)
+	strcpy(sendBuf,pSendBuf);*/
+
+	struct sockaddr_in m_rmtAddr;
+
+	bzero(&m_rmtAddr, sizeof(m_rmtAddr));
+	m_rmtAddr.sin_family = AF_INET;
+	m_rmtAddr.sin_addr.s_addr = inet_addr(masterIp);
+	m_rmtAddr.sin_port = htons(UDPPORT);
+
+	//创建并初始化select需要的参数(这里仅监视write)，并把Objsoc添加到fd_set中
+	fd_set writefds;
+	struct timespec timeout;
+	timeout.tv_sec = SELECT_TIMEOUT;
+	timeout.tv_nsec = 0;
+	int ret = 0;
+
+	FD_ZERO(&writefds);
+	FD_SET(sockfd, &writefds);
+	while ((ret = pselect(sockfd + 1, NULL, &writefds, NULL, &timeout, NULL)) == 0)
 	{
-		//fprintf(stderr,"sendFailure\n");
+		fprintf(stderr, "send pselect timeout\n");
+		if (isRecvStatus != true)break;
+	}
+	if (ret < 0)
+	{
+		if (errno != EINTR)
+		{
+			fprintf(stderr, "UDP send select fail\n");
+			return false;
+		}
+		else
+		{
+			fprintf(stderr, "Receive interrupt signal...\n");
+		}
 	}
 	else
 	{
-		//fprintf(stderr,"sendSucess\n");
+
+		int len = sendto(sockfd, pSendBuf, length, 0, (struct sockaddr *)&m_rmtAddr, sizeof(m_rmtAddr));
+		return len;
 	}
-	m_sendLocker->Unlock();
-	return len;
+	//m_sendLocker->Unlock();
+
 	
 }
-int CSlave::Send2Slave(int length,std::string ip)
+int CSlave::Send2Slave(char* pSendBuf, int length, std::string ip)
 {
-	m_sendLocker->Lock();
-	char sendBuf[BUFLENGTH];
-	//bzero(&rmtAddr, sizeof(rmtAddr));
-	rmtAddr.sin_family = AF_INET;
-	rmtAddr.sin_addr.s_addr = inet_addr(ip.c_str());
-	rmtAddr.sin_port = htons(UDPPORT);
-	int len = sendto(sockfd, sendBuf, length, 0, (struct sockaddr *)&rmtAddr, sizeof(rmtAddr));
-	if (len <= 0)
+	//m_sendLocker->Lock();
+	//char sendBuf[BUFLENGTH];
+	////bzero(&rmtAddr, sizeof(rmtAddr));
+	//rmtAddr.sin_family = AF_INET;
+	//rmtAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+	//rmtAddr.sin_port = htons(UDPPORT);
+
+
+
+	//创建并初始化select需要的参数(这里仅监视write)，并把Objsoc添加到fd_set中
+	fd_set writefds;
+	struct timespec timeout;
+	timeout.tv_sec = SELECT_TIMEOUT;
+	timeout.tv_nsec = 0;
+	int ret = 0;
+
+	FD_ZERO(&writefds);
+	FD_SET(sockfd, &writefds);
+	while ((ret = pselect(sockfd + 1, NULL, &writefds, NULL, &timeout, NULL)) == 0)
 	{
-		//fprintf(stderr,"sendFailure\n");
+		fprintf(stderr, "send pselect timeout\n");
+		if (isRecvStatus != true)break;
+	}
+	if (ret < 0)
+	{
+		if (errno != EINTR)
+		{
+			fprintf(stderr, "UDP send select fail\n");
+			return false;
+		}
+		else
+		{
+			fprintf(stderr, "Receive interrupt signal...\n");
+		}
 	}
 	else
 	{
-		//fprintf(stderr,"sendSucess\n");
+		//m_sendLocker->Lock();
+		//char sendBuf[BUFLENGTH];
+		struct sockaddr_in m_rmtAddr;
+		bzero(&m_rmtAddr, sizeof(m_rmtAddr));
+		m_rmtAddr.sin_family = AF_INET;
+		m_rmtAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+		m_rmtAddr.sin_port = htons(UDPPORT);
+		int len = sendto(sockfd, pSendBuf, length, 0, (struct sockaddr *)&m_rmtAddr, sizeof(rmtAddr));
+
+		//m_sendLocker->Unlock();
+
+		return len;
+
 	}
-	m_sendLocker->Unlock();
-	return len;
+
+
+
+	//int len = sendto(sockfd, sendBuf, length, 0, (struct sockaddr *)&rmtAddr, sizeof(rmtAddr));
+	//if (len <= 0)
+	//{
+	//	//fprintf(stderr,"sendFailure\n");
+	//}
+	//else
+	//{
+	//	//fprintf(stderr,"sendSucess\n");
+	//}
+	//m_sendLocker->Unlock();
 	
 }
 void CSlave::stringSplit(std::string strTemp)
@@ -696,28 +783,36 @@ void CSlave::SendRegister2Master()
 }
 void CSlave::SendAlive2Master()
 {
-	m_mapLocker->Lock();
+
 	std::map<std::string, std::string>::iterator it;
 	/*
 		给master发送alive
 	*/
 	char sendBuf[BUFLENGTH];
+	char ip[4] = { 0 };
 	memset(sendBuf, 0, BUFLENGTH);
 	sendBuf[0] = static_cast<char>(AliveOpcode);
-	stringSplit(masterIp);
+	sscanf(slaveIp, "%d.%d.%d.%d", &ip[0], &ip[1], &ip[2], &ip[3]);
+	sendBuf[1] = ip[0];
+	sendBuf[2] = ip[1];
+	sendBuf[3] = ip[2];
+	sendBuf[4] = ip[3];
+	//stringSplit(masterIp);
 	Send2Master(sendBuf,LENGTH);
-	fprintf(stderr,"sendAlive2Master\n");
+	fprintf(stderr,"sendAliveToMaster\n");
+
+	m_mapLocker->Lock();
 	/*
 		给每个slave 发送alive，自己除外 
 	*/
 	for (it = slavemap.begin(); it != slavemap.end(); it++)   
 	{
-		if (slaveIp != it->first)
+		if (slaveIp != (it->first.c_str()))
 		{
-			sendBuf[0] = static_cast<char>(ALIVE);
-			stringSplit(it->first);
-			Send2Slave(LENGTH, it->first);
-			fprintf(stderr,"sendAlive2:%s\n",(it->first).c_str());
+			//sendBuf[0] = static_cast<char>(ALIVE);
+			//stringSplit(it->first);
+			Send2Slave(sendBuf, LENGTH, it->first);//待验证。。。
+			fprintf(stderr,"sendAliveToSlave:%s\n",(it->first).c_str());
 		}
 	}
 	m_mapLocker->Unlock();
