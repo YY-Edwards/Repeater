@@ -566,7 +566,7 @@ void MyRepeater::DecodeThreadFunc()
 			//gettimeofday(&dec_end, NULL);
 			m_PlayBackQueue.PushToQueue((char *)decode_buff, 320);//推送到发送队列
 			//fprintf(stderr, "Decode Time is :%ld s,%ld us\n", (dec_end.tv_sec - dec_start.tv_sec), (dec_end.tv_usec - dec_start.tv_usec));
-			usleep(300)
+			usleep(300);
 			bzero(decode_buff, sizeof(decode_buff));
 			bzero(encode_buff, sizeof(encode_buff));
 

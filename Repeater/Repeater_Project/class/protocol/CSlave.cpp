@@ -113,7 +113,7 @@ void CSlave::GetStatus()
 	sendBuf[3] = static_cast<char>(GETCHANNEL);
 	Send2Master(sendBuf,LENGTH-2);
 
-	sem->SemPost():
+	sem->SemPost();
 	//sem_post(&sem);
 
 }
