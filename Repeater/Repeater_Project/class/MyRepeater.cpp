@@ -198,7 +198,6 @@ void MyRepeater::Stop()
 		delete decode_thread_p;
 		decode_thread_p = NULL;
 	}
-
 	//delete sem
 	if (CD_trigger_cond != NULL)
 	{
@@ -215,6 +214,7 @@ void MyRepeater::Stop()
 		delete send_rtp_cond;
 		send_rtp_cond = NULL;
 	}
+
 	if (playback_cond != NULL)
 	{
 		delete playback_cond;
@@ -232,24 +232,28 @@ void MyRepeater::Stop()
 		delete playback_start_flag_mutex;
 		playback_start_flag_mutex = NULL;
 	}
-	if (map_mutex != NULL)
-	{
-		delete map_mutex;
-		map_mutex = NULL;
-	}
+
 
 	//clear map
 	map<string, Myrtp*>::iterator it;
 	while (sessionmap.size() > 0)
 	{
 		it = sessionmap.begin();
-		if (it->second)
-		{
-			delete it->second;
+		if (it->second != NULL)
+		{	
+			delete it->second;;
 			it->second = NULL;
 		}
 		sessionmap.erase(it);
 	}
+
+	if (map_mutex != NULL)
+	{
+		delete map_mutex;
+		map_mutex = NULL;
+	}
+
+	fprintf(stderr, "debug-4\n");
 	std::map <std::string, std::string> ::iterator at;
 	while (base_masterMap.size() > 0)
 	{
@@ -1439,7 +1443,7 @@ void MyRepeater::RTPsendThreadFunc()
 
 	size = my_alsa->get_playback_period_size();
 
-	Myrtp *pSess = new Myrtp();
+	Myrtp *pSess = NULL;//应该是个临时变量
 
 	char package_send_buffer[20];
 	bzero(package_send_buffer, 20);
@@ -1512,17 +1516,8 @@ void MyRepeater::RTPsendThreadFunc()
 
 	for (it = sessionmap.begin(); it != sessionmap.end(); it++)
 	{
-		pSess = it->second;
-
-		pSess->BYEDestroy(RTPTime(1, 0), 0, 0);
-
+		it->second->BYEDestroy(RTPTime(1, 0), 0, 0);
 	}
-	if (pSess != NULL)
-	{
-		delete pSess;
-		pSess = NULL;
-	}
-		
 
 	fprintf(stderr, "exit:rtp send pthread\n");
 
@@ -1760,6 +1755,7 @@ void MyRepeater::rtp_session_create(std::map<std::string, std::string> slavemap)
 			Myrtp *pRtp = new Myrtp();
 			pRtp->init(4000, masterip_str, baseip_str);
 			sessionmap[masterip_str] = pRtp;
+			fprintf(stderr, "pRtp addr:0x%x\n", pRtp);
 			fprintf(stderr,"Slave connect master session create okay!!!\n");
 		}
 	
