@@ -33,6 +33,21 @@ int main(void)
 	signal(SIGABRT, signal_handler);
 	signal(SIGCHLD, signal_handler);
 
+	fprintf(stderr, "\n/***********************V2.1.0.1******************************/\n");
+	fprintf(stderr, "\n/****************Repeater main() is running*******************/\n");
+	//The 4-byte APP Firmware Version number uses a Major Number to track the major changes,
+	// Minor Number to track minor changes and Product ID Number to differentiate the product line.
+	/*Product ID Number:
+	0x0001   DRS
+	0x0002
+	0x0003	...
+	...		...
+
+
+
+	*/
+
+
 	MyRepeater *my_repeater = new MyRepeater;
 
 	my_repeater->Start();
