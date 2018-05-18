@@ -253,7 +253,6 @@ void MyRepeater::Stop()
 		map_mutex = NULL;
 	}
 
-	fprintf(stderr, "debug-4\n");
 	std::map <std::string, std::string> ::iterator at;
 	while (base_masterMap.size() > 0)
 	{
