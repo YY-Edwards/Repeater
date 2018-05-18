@@ -807,7 +807,8 @@ void CSlave::SendAlive2Master()
 	*/
 	for (it = slavemap.begin(); it != slavemap.end(); it++)   
 	{
-		if (slaveIp != (it->first.c_str()))
+		//if (slaveIp != (it->first.c_str()))
+		if (strcmp(slaveIp, it->first.c_str())!=0)
 		{
 			//sendBuf[0] = static_cast<char>(ALIVE);
 			//stringSplit(it->first);
