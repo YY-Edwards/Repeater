@@ -490,6 +490,7 @@ void CSlave::SendAliveThreadFunc()
 		{
 			SendAlive2Master();
 		}
+		
 		//pthread_testcancel();
 		sleep(20);/*20s更新一次心跳*/
 		//pthread_testcancel();
@@ -692,7 +693,7 @@ int CSlave::Send2Slave(char* pSendBuf, int length, std::string ip)
 		m_rmtAddr.sin_family = AF_INET;
 		m_rmtAddr.sin_addr.s_addr = inet_addr(ip.c_str());
 		m_rmtAddr.sin_port = htons(UDPPORT);
-		int len = sendto(sockfd, pSendBuf, length, 0, (struct sockaddr *)&m_rmtAddr, sizeof(rmtAddr));
+		int len = sendto(sockfd, pSendBuf, length, 0, (struct sockaddr *)&m_rmtAddr, sizeof(m_rmtAddr));
 
 		//m_sendLocker->Unlock();
 

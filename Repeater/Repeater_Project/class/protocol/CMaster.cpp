@@ -377,26 +377,77 @@ void CMaster::SendAlive2Slave(std::string slaveIp)
 
 int CMaster::Send2Slave(char *pSendBuf,int length,std::string ip)
 {
-	m_sendLocker->Lock();
-	char sendBuf[BUFLENGTH];
-	memset(sendBuf, 0, BUFLENGTH);
-	strcpy(sendBuf,pSendBuf);
-	//bzero(&rmtAddr, sizeof(rmtAddr));
-	rmtAddr.sin_family = AF_INET;
-	rmtAddr.sin_addr.s_addr = inet_addr(ip.c_str());
-	rmtAddr.sin_port = htons(UDPPORT);
-	int len = sendto(sockfd, sendBuf, length, 0, (struct sockaddr *)&rmtAddr, sizeof(rmtAddr));
-	//fprintf(stderr,"sendToLength:%d\n",len);
-	if (len <= 0)
+
+	//创建并初始化select需要的参数(这里仅监视write)，并把Objsoc添加到fd_set中
+	fd_set writefds;
+	struct timespec timeout;
+	timeout.tv_sec = SELECT_TIMEOUT;
+	timeout.tv_nsec = 0;
+	int ret = 0;
+
+	FD_ZERO(&writefds);
+	FD_SET(sockfd, &writefds);
+	while ((ret = pselect(sockfd + 1, NULL, &writefds, NULL, &timeout, NULL)) == 0)
 	{
-		//fprintf(stderr,"sendFailure\n");
+		fprintf(stderr, "send pselect timeout\n");
+		if (isRecvStatus != true)break;
+	}
+	if (ret < 0)
+	{
+		if (errno != EINTR)
+		{
+			fprintf(stderr, "UDP send select fail\n");
+			return false;
+		}
+		else
+		{
+			fprintf(stderr, "Receive interrupt signal...\n");
+		}
 	}
 	else
 	{
-		//fprintf(stderr,"sendSucess\n");
+		//m_sendLocker->Lock();
+		//char sendBuf[BUFLENGTH];
+		struct sockaddr_in m_rmtAddr;
+		bzero(&m_rmtAddr, sizeof(m_rmtAddr));
+		m_rmtAddr.sin_family = AF_INET;
+		m_rmtAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+		m_rmtAddr.sin_port = htons(UDPPORT);
+		int len = sendto(sockfd, pSendBuf, length, 0, (struct sockaddr *)&m_rmtAddr, sizeof(m_rmtAddr));
+
+		//m_sendLocker->Unlock();
+
+		return len;
+
 	}
-	m_sendLocker->Unlock();
-	return len;
+
+
+
+
+
+
+
+
+	//m_sendLocker->Lock();
+	//char sendBuf[BUFLENGTH];
+	//memset(sendBuf, 0, BUFLENGTH);
+	//strcpy(sendBuf,pSendBuf);
+	////bzero(&rmtAddr, sizeof(rmtAddr));
+	//rmtAddr.sin_family = AF_INET;
+	//rmtAddr.sin_addr.s_addr = inet_addr(ip.c_str());
+	//rmtAddr.sin_port = htons(UDPPORT);
+	//int len = sendto(sockfd, sendBuf, length, 0, (struct sockaddr *)&rmtAddr, sizeof(rmtAddr));
+	////fprintf(stderr,"sendToLength:%d\n",len);
+	//if (len <= 0)
+	//{
+	//	//fprintf(stderr,"sendFailure\n");
+	//}
+	//else
+	//{
+	//	//fprintf(stderr,"sendSucess\n");
+	//}
+	//m_sendLocker->Unlock();
+	//return len;
 }
 void  CMaster::onData(void(*func)(int, ResponeData), int command, ResponeData data)
 {
@@ -519,7 +570,7 @@ void CMaster::Updatemap(std::string rmtIp)
 		if ((t - tm_time>60) || (t - tm_time < 0))            //超时60s则发送map,时间bug.
 		{
 			
-			 fprintf(stderr,"updateMap2:%s\n", (it->first).c_str());
+			 fprintf(stderr,"timeout,updateMap2:%s\n", (it->first).c_str());
 			 slavemap.erase(it++);
 			 m_mapLocker->Unlock();
 			 Sendmap2Slave();
@@ -531,7 +582,7 @@ void CMaster::Updatemap(std::string rmtIp)
 			 }
 			
 		}
-		else if(rmtIp == it->first)
+		else if(rmtIp == it->first)//不超时，则更新map表的时间
 		{
 			strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
 			slavemap[it->first] = tmp;
@@ -544,13 +595,13 @@ void CMaster::Updatemap(std::string rmtIp)
 			}*/
 
 		}
-		else
+		else//继续查找下一个
 		{
 			it++;
 		}
 		
 	}
-	if (!isHave || 0 == slavemap.size())
+	if (!isHave || 0 == slavemap.size())//map为空，或者不在当前的map中，则执行（运行过程中，主机突然掉线，重新通信后，若主机map为空则自动添加）
 	{
 		strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S", localtime(&t));
 		slavemap[rmtIp] = tmp;
@@ -562,9 +613,6 @@ void CMaster::Updatemap(std::string rmtIp)
 		m_mapLocker->Unlock();
 		Sendmap2Slave();
 		m_mapLocker->Lock();
-
-
-
 	}
 	m_mapLocker->Unlock();
 	
@@ -624,8 +672,9 @@ void CMaster::Sendmap2Slave()
 	}
 	for (it = slavemap.begin(); it != slavemap.end(); it++)
 	{
-		Send2Slave(sendBuf,i, (it->first).c_str());
-		fprintf(stderr,"sendMap2:%s\n",(it->first).c_str());
+		//Send2Slave(sendBuf,i, (it->first).c_str());
+		Send2Slave(sendBuf, i, it->first);
+		fprintf(stderr,"sendMapToSlave:%s\n",(it->first).c_str());
 	}
 	
 	m_mapLocker->Unlock();
