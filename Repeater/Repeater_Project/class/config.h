@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <fcntl.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/types.h>

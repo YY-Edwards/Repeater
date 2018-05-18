@@ -36,6 +36,51 @@ Monitor_Interface::~Monitor_Interface()
 
 
 }
+
+
+
+int Monitor_Interface::pox_system(const char *cmd_line)
+{
+	//调整的原因：调用system函数时，其中会调用fork()函数，并用子进程去执行命令，父进程等待回收子进程。
+	//而初始化的时候，将SIGCHLD信号注册为回调方式处理退出的子线程，此时可能出现进入回调回收了子线程，
+	//然后再回到system里的父线程，可能因此不能回收子线程，而出现错误。而命令在子线程里有可能是执行成功的。
+	int ret = 0;
+	//fprintf(stderr, "pox_system:%s", cmd_line);
+	sighandler_t old_handler;
+	old_handler = signal(SIGCHLD, SIG_DFL);//返回上一次的行为
+	ret = system(cmd_line);
+	//（1） - 1 != status
+	//（2）WIFEXITED(status)为真
+	//（3）0 == WEXITSTATUS(status)
+	if (ret == -1)
+	{
+		fprintf(stderr, "system error:%d\n", errno);
+	}
+	else
+	{
+		//fprintf(stderr, "exit ret value:0x%x\n", ret);
+		if (WIFEXITED(ret))
+		{
+			if (0 == WEXITSTATUS(ret))
+			{
+				//fprintf(stderr, "run shell script successfully.\n");
+			}
+			else
+			{
+				fprintf(stderr, "run shell script fail, script exit code: %d\n", WEXITSTATUS(ret));
+			}
+		}
+		else
+		{
+			fprintf(stderr, "exit status = [%d]\n", WEXITSTATUS(ret));
+		}
+	}
+
+	signal(SIGCHLD, old_handler);//恢复之前的行为
+
+}
+
+
 void Monitor_Interface::config_hw_repeater()
 {
 	char tmp[100];
@@ -46,45 +91,76 @@ void Monitor_Interface::config_hw_repeater()
 	fprintf(stderr,"config Reapeater hw...\n");
 
 	sprintf(tmp,"ifconfig eth0 hw ether %s", MAC);//config MAC
-	system(tmp);
+	pox_system(tmp);
 	bzero(tmp, 100);
 
 	sprintf(tmp,"ifconfig eth0 %s", base_ip_str);//config eth0 IP
-	system(tmp);
+	pox_system(tmp);
 	bzero(tmp, 100);
 
 
 	sprintf(tmp, "ifconfig");//print out the information
-	system(tmp);
+	pox_system(tmp);
 	bzero(tmp, 100);
 
 	sprintf(tmp, "route add default gw %s netmask %s dev eth0", gateway_ip, subnetmask);//config default gateway
-	system(tmp);
+	pox_system(tmp);
 	bzero(tmp, 100);
 
 	//add multicast route
 	/*sprintf(tmp, "route add -net 224.0.0.0 netmask 240.0.0.0 dev eth0 ");
-	system(tmp);
+	pox_system(tmp);
 	bzero(tmp, 100);*/
 
 	//Recording sound using ALSA from Line IN
 	sprintf(tmp, "amixer -c 0 cset numid=7 1");
-	system(tmp);
+	pox_system(tmp);
 	bzero(tmp, 100);
 
 	//capture volume:95%
 	sprintf(tmp, "amixer -c 0 cset numid=2 14");
-	system(tmp);
+	pox_system(tmp);
 	bzero(tmp, 100);
 
 	//playback volume:95%
 	sprintf(tmp, "amixer -c 0 cset numid=4 180");
-	system(tmp);
+	pox_system(tmp);
 	bzero(tmp, 100);
 
 
+}
 
 
+void Monitor_Interface::led_control()
+{
+
+	char tmp[50];
+	static unsigned char flag;
+	static unsigned char i = 1;
+
+	bzero(tmp, 50);
+
+	//while (1)
+	{
+		flag = i & 0x01;
+		sprintf(tmp, "echo %d > /sys/class/leds/d19/brightness", flag);
+		pox_system(tmp);
+		usleep(30000);
+		sprintf(tmp, "echo 00 > /sys/class/leds/d19/brightness", flag);
+		pox_system(tmp);
+		usleep(32000);
+		sprintf(tmp, "echo %d > /sys/class/leds/d19/brightness", flag);
+		pox_system(tmp);
+		usleep(27000);
+		sprintf(tmp, "echo 00 > /sys/class/leds/d19/brightness", flag);
+		pox_system(tmp);
+
+		//usleep(200000);
+		i++;
+
+		if (i == 100)i = 1;
+
+	}
 
 }
 

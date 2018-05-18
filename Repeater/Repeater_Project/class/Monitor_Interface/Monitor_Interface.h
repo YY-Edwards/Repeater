@@ -8,14 +8,15 @@
 #define Monitor_Interface_h_ 
 #include <string.h>
 #include <string>
-
-#include<stdio.h>
+#include "config.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <stdint.h>
 #include "MFile.h"
+
 
 
 class Monitor_Interface 
@@ -33,6 +34,8 @@ public:
 	uint8_t get_userport(){ return userport; }
 	std::string get_base_ip(){ return ((std::string)base_ip_str); }
 	std::string get_master_ip(){ return master_ip_str; }//isMaster
+
+	void led_control();
 
 
 protected:
@@ -67,7 +70,9 @@ private:
 	char switch_ip[32];//e.g:192.168.1.1
 
 	void read_config_file();
-	
+
+	int pox_system(const char *cmd_line);
+
 	
 };
 

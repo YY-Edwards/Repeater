@@ -1022,34 +1022,36 @@ void MyRepeater::repeater_task_start()
 
 void MyRepeater::LedIndicatorThreadFunc()
 {
-	char tmp[50];
-	static unsigned char flag;
-	static unsigned char i = 1;
 
-	bzero(tmp, 50);
+	my_baseinfo->led_control();
+	//char tmp[50];
+	//static unsigned char flag;
+	//static unsigned char i = 1;
 
-	//while (1)
-	{
-		flag = i&0x01;
-		sprintf(tmp,"echo %d > /sys/class/leds/d19/brightness",flag);
-		system(tmp);
-		usleep(30000);
-		sprintf(tmp, "echo 00 > /sys/class/leds/d19/brightness", flag);
-		system(tmp);
-		usleep(32000);
-		sprintf(tmp, "echo %d > /sys/class/leds/d19/brightness", flag);
-		system(tmp);
-		usleep(27000);
-		sprintf(tmp, "echo 00 > /sys/class/leds/d19/brightness", flag);
-		system(tmp);
+	//bzero(tmp, 50);
 
-		//usleep(200000);
-		i++;
+	////while (1)
+	//{
+	//	flag = i&0x01;
+	//	sprintf(tmp,"echo %d > /sys/class/leds/d19/brightness",flag);
+	//	system(tmp);
+	//	usleep(30000);
+	//	sprintf(tmp, "echo 00 > /sys/class/leds/d19/brightness", flag);
+	//	system(tmp);
+	//	usleep(32000);
+	//	sprintf(tmp, "echo %d > /sys/class/leds/d19/brightness", flag);
+	//	system(tmp);
+	//	usleep(27000);
+	//	sprintf(tmp, "echo 00 > /sys/class/leds/d19/brightness", flag);
+	//	system(tmp);
 
-		if (i == 100)i = 1;
+	//	//usleep(200000);
+	//	i++;
 
-	}
-	
+	//	if (i == 100)i = 1;
+
+	//}
+	//
 
 
 }
