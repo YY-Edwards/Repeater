@@ -1755,7 +1755,6 @@ void MyRepeater::rtp_session_create(std::map<std::string, std::string> slavemap)
 			Myrtp *pRtp = new Myrtp();
 			pRtp->init(4000, masterip_str, baseip_str);
 			sessionmap[masterip_str] = pRtp;
-			fprintf(stderr, "pRtp addr:0x%x\n", pRtp);
 			fprintf(stderr,"Slave connect master session create okay!!!\n");
 		}
 	
