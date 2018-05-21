@@ -290,9 +290,19 @@ bool RingQueue::PushToQueue(void *packet, int len)
 	memcpy(ptr->data, packet, len);
 	ptr->len = len;
 
-	next_index = (queue_head + 1) & (FIFODEEP - 1);
+
+	//next_index = (queue_head + 1) & (FIFODEEP - 1);
+	//if (next_index != queue_tail)
+	//{
+	//	queue_head = next_index;
+	//	ret = true;//okay
+	//}
+	next_index = queue_head + 1;
 	if (next_index != queue_tail)
 	{
+		if (next_index == FIFODEEP){
+			next_index = 0;
+		}
 		queue_head = next_index;
 		ret = true;//okay
 	}
@@ -317,7 +327,12 @@ int32_t RingQueue::TakeFromQueue(void *packet, int& len)
 	{
 		memcpy(packet, ringqueue[queue_tail].data, ringqueue[queue_tail].len);
 		len = ringqueue[queue_tail].len;
-		queue_tail = (queue_tail + 1) & (FIFODEEP - 1);
+		//queue_tail = (queue_tail + 1) & (FIFODEEP - 1);
+		queue_tail = queue_tail + 1;
+		if (queue_tail == FIFODEEP)
+		{
+			queue_tail = 0;
+		}
 		ret = 0;//success
 	}
 	else
