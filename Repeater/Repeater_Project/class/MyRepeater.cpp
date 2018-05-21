@@ -1259,7 +1259,8 @@ void MyRepeater::RecordThreadFunc()
 				fprintf(stderr, "m_EncodeQueue PushToQueue full...\n");
 			}
 		}
-		setTimer(0, 15000);//20ms
+		setTimer(0, 2000);//2ms
+		//setTimer(0, 15000);//20ms
 		//usleep(20000);//20ms
 		//fprintf(stderr, "record_run\n");
 
@@ -1403,7 +1404,7 @@ void MyRepeater::PlaybackThreadFunc()
 				fprintf(stderr, "m_PlayBackQueue.TakeFromQueue err : %d\n", temp);//nerver happened
 				break;
 			}
-			setTimer(0, 1000);//1ms
+			setTimer(0, 2000);//2ms
 
 	}
 
