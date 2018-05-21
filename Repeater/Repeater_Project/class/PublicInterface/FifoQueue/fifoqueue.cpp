@@ -312,7 +312,7 @@ int32_t RingQueue::TakeFromQueue(void *packet, int& len)
 
 	queuelock->Lock();
 
-	int snap_head = queue_head;
+	int snap_head = queue_head;//try queue
 	if (snap_head != queue_tail)
 	{
 		memcpy(packet, ringqueue[queue_tail].data, ringqueue[queue_tail].len);
@@ -337,13 +337,14 @@ void RingQueue::ClearQueue()
 
 bool RingQueue::QueueIsEmpty()
 {
-	if (queue_tail == queue_head)
+	int mid_flag = queue_head;//middle temp
+	if (mid_flag != queue_tail)
 	{
-		return true;
+		return false;
 	}
 	else
 	{
-		return false;
+		return true;
 	}
 
 }
