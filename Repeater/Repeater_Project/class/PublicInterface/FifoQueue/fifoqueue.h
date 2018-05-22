@@ -18,7 +18,7 @@
 #include "syninterface.h"
 //#include "log.h"
 
-#define FIFODEEP  100
+#define FIFODEEP  30
 #define DATADEEP  320
 #pragma pack(push, 1)
 typedef struct{
@@ -106,8 +106,8 @@ public:
 private:
 
 	fifoqueue_t ringqueue[FIFODEEP];
-	int queue_head;
-	int queue_tail;
+	volatile int queue_head;
+	volatile int queue_tail;
 	ILock	*queuelock;
 };
 

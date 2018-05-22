@@ -298,6 +298,9 @@ bool RingQueue::PushToQueue(void *packet, int len)
 	//	ret = true;//okay
 	//}
 	next_index = queue_head + 1;
+
+	//fprintf(stderr, "next_index:%d\n", next_index);
+	//fprintf(stderr, "queue_tail:%d\n", queue_tail);
 	if (next_index != queue_tail)
 	{
 		if (next_index == FIFODEEP){
