@@ -1,0 +1,1 @@
+arm-none-linux-gnueabi-gcc -o sgtl5000_okay_test sgtl5000_okay_test.c -I /usr/share/alsa-lib/include -L/usr/share/alsa-lib/lib/  -L/usr/local/lib/   -ldl -lm -lasound

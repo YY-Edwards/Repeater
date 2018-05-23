@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <alsa/asoundlib.h>
-#include <speex/speex.h>
-#include <speex/speex_preprocess.h>    
-#include <speex/speex_echo.h> 
+// #include <speex/speex.h>
+// #include <speex/speex_preprocess.h>    
+// #include <speex/speex_echo.h> 
 #include<sys/time.h>
 #include<unistd.h>
 #include <sys/types.h>
@@ -154,11 +154,11 @@ void alsa_params_config(void )
     	}
 		
 		err = snd_pcm_hw_params_get_buffer_time(c_hwparams, &capture_buffer_time, 0);
-		printf("capture_buffer_time is : %d us\n", capture_buffer_time);
+		//printf("capture_buffer_time is : %d us\n", capture_buffer_time);
 
 		
 		err = snd_pcm_hw_params_get_period_time(c_hwparams, &capture_period_time, 0);
-		printf("capture_period_time is : %d us \n", capture_period_time);
+		//printf("capture_period_time is : %d us \n", capture_period_time);
 
 			
 		 	
@@ -192,13 +192,13 @@ void alsa_params_config(void )
 	}  
 	
 
-	fprintf(stderr,  
-				"capture_size = %d\n",	
-					c_size);
+	// fprintf(stderr,  
+				// "capture_size = %d\n",	
+					// c_size);
 					
 	memset(capture_buffer, 0x00, c_size);
 
-	fprintf(stderr, "alsa-audio-params config  success\n");
+	//fprintf(stderr, "alsa-audio-params config  success\n");
 
 
 }
@@ -234,7 +234,7 @@ main(int argc, char *argv[])
 	bzero(tmp, 50);
 	
 	
-while(record_counter < 100) {
+while(record_counter < 150) {
 
 		//gettimeofday(&begin_record, NULL);
 		err = snd_pcm_readi(capture_handle, (signed short *)capture_buffer, capture_frames);
@@ -299,7 +299,7 @@ while(record_counter < 100) {
 OUT:
 	
 	
-	printf("1\n");
+	//printf("1\n");
 	if(capture_buffer != NULL){
 		
 		free(capture_buffer);
@@ -311,7 +311,7 @@ OUT:
 	fprintf(stderr, "codes is over \n");
 	
 	fprintf(stderr, "record_counter : %d\r\n", record_counter);
-	
+	fprintf(stderr, "reboot threshold : 100\r\n");
 	 if (zheng_counter != 0){
 		printf("zheng_counter: %d, zheng_sum: %d, zheng_average: %d\r\n", zheng_counter, zheng_sum, (zheng_sum / zheng_counter));
 		zheng_average = zheng_sum / zheng_counter;
@@ -340,7 +340,7 @@ OUT:
 	
 	//if(fu_average < (-1000) || (zheng_average > 1000)){
 		
-		if(fu_average < (-600) && (zheng_average > 1000)){
+		if(fu_average < (-100) && (zheng_average > 100)){
 		
 			printf("audio record fail... \r\n");
 			sprintf(tmp, "reboot");//restart the device
