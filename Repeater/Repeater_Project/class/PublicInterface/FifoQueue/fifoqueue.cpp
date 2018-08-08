@@ -85,9 +85,14 @@ bool DynFifoQueue::PushToDynQueue(void *packet, unsigned int len)
 	}
 
 	if (len>p_data_deep)return false;//data overout
-	if (m_dyn_list.size() >= p_fifo_deep)return false;//fifo full
 
 	queuelock->Lock();
+
+	if (m_dyn_list.size() >= p_fifo_deep)
+	{
+		queuelock->Unlock();
+		return false;//fifo full
+	}
 
 	memcpy(ptr_fifo[fifo_counter].data, packet, len);
 
@@ -116,23 +121,24 @@ int32_t DynFifoQueue::TakeFromDynQueue(void *packet, unsigned int& len, int wait
 	{
 		return ret;//timeout or failed
 	}
+
+	queuelock->Lock();
+
 	if (!m_dyn_list.empty())
 	{
-		queuelock->Lock();
-
 		sBuffer = m_dyn_list.front();//返回链表第一个结构体数据包地址给sbuffer
 		m_dyn_list.pop_front();//并删除链表第一个数据包地址
 		memcpy(packet, sBuffer->data, sBuffer->len);
 		len = sBuffer->len;
-
-		queuelock->Unlock();
-		return ret;
 	}
 	else
 	{
-		return -2;//no happen but must check
+		ret = -2;//no happen but must check
 
 	}
+
+	queuelock->Unlock();
+	return ret;
 
 
 }
@@ -185,16 +191,24 @@ void FifoQueue::ClearQueue()
 
 bool  FifoQueue::QueueIsEmpty()
 {
-	return(m_list.empty());
+	queuelock->Lock();
+	bool ret = m_list.empty();
+	queuelock->Unlock();
+	return ret;
 }
 
 bool FifoQueue::PushToQueue(void *packet, int len)
 {
 	//int err = 0;
 	if (len>DATADEEP)return false;//data overout
-	if (m_list.size() >= FIFODEEP)return false;//fifo full
 
 	queuelock->Lock();
+	if (m_list.size() >= FIFODEEP)
+	{
+		queuelock->Unlock();
+		return false;//fifo full
+
+	}
 	////清空结构体
 	//memset(&(fifobuff[fifo_counter].data), 0x00, DATADEEP);
 	//memset(&(fifobuff[fifo_counter].len), 0x00, sizeof(uint8_t));
@@ -228,24 +242,24 @@ int32_t FifoQueue::TakeFromQueue(void *packet, int& len, int waittime)
 	{
 		return ret;//timeout or failed
 	}
+
+	queuelock->Lock();
+
 	if (!m_list.empty())
 	{
-			queuelock->Lock();
-
-			sBuffer = m_list.front();//返回链表第一个结构体数据包地址给sbuffer
-			m_list.pop_front();//并删除链表第一个数据包地址
-			memcpy(packet, sBuffer->data, sBuffer->len);
-			len = sBuffer->len;
-
-			queuelock->Unlock();
-			return ret;
+		sBuffer = m_list.front();//返回链表第一个结构体数据包地址给sbuffer
+		m_list.pop_front();//并删除链表第一个数据包地址
+		memcpy(packet, sBuffer->data, sBuffer->len);
+		len = sBuffer->len;
 	}
 	else
 	{
-		return -2;//no happen but must check
+		ret = -2;//no happen but must check
 
 	}
 
+	queuelock->Unlock();
+	return ret;
 
 }
 
