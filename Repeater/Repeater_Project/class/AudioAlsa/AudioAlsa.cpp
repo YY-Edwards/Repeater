@@ -174,6 +174,12 @@ void AudioAlsa::alsa_params_config()
 			fprintf(stderr, "cannot set channel count (%s) \n", snd_strerror(err));
 			exit(1);
 		}
+		
+		//sample	= 2bytes(LSB,MSB)-SND_PCM_FORMAT_S16_LE
+		//frame		= 1*sample(channel)
+		//period	= x*frames
+		//buffer	= y*periods
+		//采样率(rate)：每秒钟采样次数，该次数是针对帧而言，常用的采样率如8KHz的人声
 
 		/* Set buffer size (in frames). The resulting latency is given by */
 		/* latency = periodsize * periods / (rate * bytes_per_frame)     */
